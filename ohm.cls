@@ -67,6 +67,7 @@
 \RequirePackage{blindtext}
 \RequirePackage{svg}
 \RequirePackage{caption}
+\RequirePackage{amssymb}
 %----------------------------------------------------------------------
 % Useable Commands
 %----------------------------------------------------------------------
@@ -413,23 +414,23 @@
 % Abstract, Keywords, and Kurzdarstellung
 %----------------------------------------------------------------------
 \newcommand{\makeabstract}{
-	\chapter*{\ifde Kurzdarstellung\else Abstract\fi}
-	\label{ch:abstract}
-	\ifen
-		\theabstract
-	\else
-		\thekurzdarstellung
-	\fi
-	\section*{\ifde Schlagwörter\else Keywords\fi}
-	\label{sec:keywords}
-	\thekeywords
-	\pagebreak
-	\ifen
-		\thispagestyle{empty}
-		\section*{\ifde Kurzdarstellung\else Kurzdarstellung\fi}
-		\label{sec:kurzdarstellung}
-		\thekurzdarstellung
-	\fi
+%	\chapter*{\ifde Kurzdarstellung\else Abstract\fi}
+%	\label{ch:abstract}
+%	\ifen
+%		\theabstract
+%	\else
+%		\thekurzdarstellung
+%	\fi
+%	\section*{\ifde Schlagwörter\else Keywords\fi}
+%	\label{sec:keywords}
+%	\thekeywords
+%	\pagebreak
+%	\ifen
+%		\thispagestyle{empty}
+%		\section*{\ifde Kurzdarstellung\else Kurzdarstellung\fi}
+%		\label{sec:kurzdarstellung}
+%		\thekurzdarstellung
+%	\fi
 }
 %----------------------------------------------------------------------
 % Acknowledgements
