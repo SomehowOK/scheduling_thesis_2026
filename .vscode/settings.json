@@ -1,13 +1,14 @@
 {
     "editor.wordWrap": "on",
-   
+
     "latex-workshop.formatting.latex": "latexindent",
     "latex-workshop.linting.delay": 250,
     "latex-workshop.linting.run": "onType",
+
     "latex-workshop.latex.tools": [
         {
             "name": "latexmk",
-            "command": "latexmk",
+            "command": "/Library/TeX/texbin/latexmk",
             "args": [
                 "-shell-escape",
                 "-synctex=1",
@@ -17,12 +18,25 @@
                 "-outdir=%OUTDIR%",
                 "%DOC%"
             ],
-            "env": {}
+            "env": {
+                "PATH": "/Library/TeX/texbin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+            }
         }
     ],
-    
+
+    "latex-workshop.latex.recipes": [
+        {
+            "name": "latexmk",
+            "tools": [
+                "latexmk"
+            ]
+        }
+    ],
+
+    "latex-workshop.latex.recipe.default": "latexmk",
+
     "explorer.excludeGitIgnore": true,
-    
+
     "cSpell.enabled": true,
     "cSpell.language": "en,de-de",
     "cSpell.minWordLength": 4,

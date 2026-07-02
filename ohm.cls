@@ -75,6 +75,24 @@
 \RenewEnviron{abstract}{\global\let\theabstract\BODY}
 \newcommand{\thekurzdarstellung}{}
 \NewEnviron{kurzdarstellung}{\global\let\thekurzdarstellung\BODY}
+% Command to add authors to the title page, supports multiple authors
+\newcommand{\theauthors}{}
+\newcommand{\theauthormetadata}{}
+\newif\ifhasAuthors
+\newif\ifhasMultipleAuthors
+\renewcommand{\author}[1]
+{
+	\ifhasAuthors
+		\expandafter\gdef\expandafter\theauthors\expandafter{\theauthors\\#1}
+		\expandafter\gdef\expandafter\theauthormetadata\expandafter{\theauthormetadata, #1}
+		\hasMultipleAuthorstrue
+	\else
+		\expandafter\gdef\expandafter\theauthors\expandafter{#1}
+		\expandafter\gdef\expandafter\theauthormetadata\expandafter{#1}
+	\fi
+	\hasAuthorstrue
+	\gdef\@author{\theauthors}
+}
 % Acknowledgements storage
 \newcommand{\theacknowledgements}{}
 \NewEnviron{acknowledgements}{\global\let\theacknowledgements\BODY}
@@ -206,7 +224,7 @@
 \AtBeginDocument{%
 	\immediate\openout\xmpdatafile=\jobname.xmpdata\relax
 	\immediate\write\xmpdatafile{\string\Title{\@title}}%
-	\immediate\write\xmpdatafile{\string\Author{\@author}}%
+	\immediate\write\xmpdatafile{\string\Author{\theauthormetadata}}%
 	\immediate\write\xmpdatafile{\string\Keywords{\thekeywords}}%
 	\immediate\closeout\xmpdatafile
 }
@@ -303,7 +321,7 @@
 		\@title\\
 		\vspace*{8ex}
 		\Large
-		\@author\\
+		\theauthors\\
 		\ifsinglepage
 			\vspace*{8ex}
 			\large
@@ -321,14 +339,14 @@
 			\footnotesize
 			\singlespacing
 			\begin{center}
-				\copyright\;\;\ifhasCompany \thecompany \else \@author \fi,\;\the\year
+				\copyright\;\;\ifhasCompany \thecompany \else \theauthormetadata \fi,\;\the\year
 			\end{center}
 			\justifying
 			\singlespacing
 			\ifen
-				\noindent This work, including its parts, \textbf{is protected by copyright}. Any use outside the narrow limits of copyright law without the consent of \ifhasCompany \thecompany~ \else the author \fi is prohibited and punishable by law. This applies in particular to reproductions, translations, microfilming and storage and processing in electronic systems.
+				\noindent This work, including its parts, \textbf{is protected by copyright}. Any use outside the narrow limits of copyright law without the consent of \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors the authors \else the author \fi \fi is prohibited and punishable by law. This applies in particular to reproductions, translations, microfilming and storage and processing in electronic systems.
 			\else
-				\noindent Diese Arbeit, einschließlich ihrer Teile, \textbf{ist urheberrechtlich geschützt}. Jede Verwertung außerhalb der engen Grenzen des Urheberrechtsgesetzes ohne Zustimmung von \ifhasCompany \thecompany~ \else dem Urheber \fi ist untersagt und strafbar. Dies gilt insbesondere für Vervielfältigungen, Übersetzungen, Mikroverfilmung und die Speicherung und Verarbeitung in elektronischen Systemen.
+				\noindent Diese Arbeit, einschließlich ihrer Teile, \textbf{ist urheberrechtlich geschützt}. Jede Verwertung außerhalb der engen Grenzen des Urheberrechtsgesetzes ohne Zustimmung von \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors den Urhebern \else dem Urheber \fi \fi ist untersagt und strafbar. Dies gilt insbesondere für Vervielfältigungen, Übersetzungen, Mikroverfilmung und die Speicherung und Verarbeitung in elektronischen Systemen.
 			\fi
 			\singlespacing
 			\ifhasCompany
@@ -347,7 +365,7 @@
 			\Large
 			\faculty\;\ifen at \else an der \fi Technische Hochschule N\"{u}rnberg\\
 			\vspace*{4ex}
-			\@author\\
+			\theauthors\\
 			\huge
 			\vspace*{2ex}
 			\textbf{\@title}\\
@@ -367,14 +385,14 @@
 			\footnotesize
 			\singlespacing
 			\begin{center}
-				\copyright\;\;\ifhasCompany \thecompany \else \@author \fi,\;\the\year
+				\copyright\;\;\ifhasCompany \thecompany \else \theauthormetadata \fi,\;\the\year
 			\end{center}
 			\justifying
 			\singlespacing
 			\ifen
-				\noindent This work, including its parts, \textbf{is protected by copyright}. Any use outside the narrow limits of copyright law without the consent of \ifhasCompany \thecompany~ \else the author \fi is prohibited and punishable by law. This applies in particular to reproductions, translations, microfilming and storage and processing in electronic systems.
+				\noindent This work, including its parts, \textbf{is protected by copyright}. Any use outside the narrow limits of copyright law without the consent of \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors the authors \else the author \fi \fi is prohibited and punishable by law. This applies in particular to reproductions, translations, microfilming and storage and processing in electronic systems.
 			\else
-				\noindent Diese Arbeit, einschließlich ihrer Teile, \textbf{ist urheberrechtlich geschützt}. Jede Verwertung außerhalb der engen Grenzen des Urheberrechtsgesetzes ohne Zustimmung von \ifhasCompany \thecompany~ \else dem Urheber \fi ist untersagt und strafbar. Dies gilt insbesondere für Vervielfältigungen, Übersetzungen, Mikroverfilmung und die Speicherung und Verarbeitung in elektronischen Systemen.
+				\noindent Diese Arbeit, einschließlich ihrer Teile, \textbf{ist urheberrechtlich geschützt}. Jede Verwertung außerhalb der engen Grenzen des Urheberrechtsgesetzes ohne Zustimmung von \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors den Urhebern \else dem Urheber \fi \fi ist untersagt und strafbar. Dies gilt insbesondere für Vervielfältigungen, Übersetzungen, Mikroverfilmung und die Speicherung und Verarbeitung in elektronischen Systemen.
 			\fi
 			\singlespacing
 			\ifhasCompany
