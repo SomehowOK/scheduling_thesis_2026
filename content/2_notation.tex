@@ -1,6 +1,9 @@
 \chapter{Notation}
 \label{chap:notation}
 
+\section*{Notation der Job-Shop-Scheduling-Problems mit sequenzabhängigen Rüstzeiten}
+
+
 In diesem Kapitel wird die Notation für das betrachtete Job-Shop-Scheduling-Problem mit sequenzabhängigen Rüstzeiten eingeführt. Die Notation dient als Grundlage für die Beschreibung der Tabu-Search-Heuristik und der verwendeten Bewertungslogik.
 
 Gegeben ist eine Menge von Jobs \(J\) und eine Menge von Maschinen \(M\). Jeder Job \(j \in J\) besteht aus einer geordneten Folge von Operationen
@@ -10,19 +13,6 @@ O_j = (o_{j,1}, o_{j,2}, \dots, o_{j,q_j}).
 Die Reihenfolge der Operationen innerhalb eines Jobs ist vorgegeben. Eine Operation \(o_{j,k}\) darf daher erst beginnen, wenn ihre direkte Vorgängeroperation \(o_{j,k-1}\) abgeschlossen ist.
 
 Jede Operation \(o_{j,k}\) wird auf genau einer Maschine \(m_{j,k} \in M\) bearbeitet und besitzt eine Bearbeitungszeit \(p_{j,k}\). Zwischen zwei Operationen, die auf derselben Maschine direkt aufeinanderfolgen, kann eine sequenzabhängige Rüstzeit \(s_{u,v}\) anfallen. Diese hängt von der vorherigen Operation \(u\) und der nachfolgenden Operation \(v\) ab.
-
-Eine Lösung \(S\) wird durch die Reihenfolge der Operationen auf jeder Maschine beschrieben. Aus diesen Maschinenreihenfolgen werden die Startzeiten, Endzeiten und der Makespan berechnet. Ziel ist die Minimierung des Makespans \(C_{\max}\).
-
-Die Zielfunktion lautet:
-\[
-\min F(S) = C_{\max}(S)
-\]
-mit
-\[
-C_{\max}(S) = \max_{o \in O} C(o).
-\]
-
-Dabei bezeichnet \(C(o)\) die Endzeit einer Operation \(o\).
 
 \begin{table}[H]
 \centering
@@ -51,34 +41,8 @@ Dabei bezeichnet \(C(o)\) die Endzeit einer Operation \(o\).
 \end{tabular}
 \end{table}
 
-Für die Bewertung einer Lösung werden die Jobpräzedenz, die Maschinenverfügbarkeit und die sequenzabhängigen Rüstzeiten berücksichtigt. Für zwei direkt aufeinanderfolgende Operationen \(u\) und \(v\) auf derselben Maschine gilt:
-\[
-t(v) \geq C(u) + s_{u,v}.
-\]
 
-Für die Reihenfolge innerhalb eines Jobs gilt:
-\[
-t(o_{j,k}) \geq C(o_{j,k-1})
-\quad \text{für } k > 1.
-\]
-
-Die Endzeit einer Operation ergibt sich aus ihrer Startzeit und Bearbeitungszeit:
-\[
-C(o_{j,k}) = t(o_{j,k}) + p_{j,k}.
-\]
-
-Die Startzeit einer Operation ist damit durch das Maximum aus Jobverfügbarkeit und Maschinenverfügbarkeit bestimmt:
-\[
-t(o_{j,k}) =
-\max \left\{
-C(o_{j,k-1}),
-C(u) + s_{u,o_{j,k}}
-\right\}.
-\]
-
-Dabei bezeichnet \(u\) die direkte Vorgängeroperation von \(o_{j,k}\) auf derselben Maschine.
-
-\section*{Notation der Tabu Search}
+\section*{Notation der Tabu-Suche}
 
 Zur Lösung des Problems wird eine Tabu-Search-Heuristik verwendet. Die aktuelle Lösung wird mit \(S\) bezeichnet. Die beste bisher gefundene Lösung wird als \(S^\ast\) notiert. Die Nachbarschaft der aktuellen Lösung wird durch \(NB(S)\) beschrieben. Sie enthält alle Lösungen, die durch zulässige lokale Bewegungen aus \(S\) erzeugt werden können.
 
@@ -110,14 +74,9 @@ Die Tabu-Liste \(TL\) speichert Bewegungsattribute, die für eine begrenzte Anza
 \end{tabular}
 \end{table}
 
-Eine Nachbarlösung \(S'\) wird akzeptiert, wenn sie unter Berücksichtigung der Tabu-Liste zulässig ist und den besten Zielfunktionswert unter den zulässigen Kandidaten besitzt. Eine tabuierte Bewegung kann dennoch akzeptiert werden, wenn sie die beste bisher gefundene Lösung verbessert. Das Aspirationskriterium lautet:
-\[
-F(S') < F(S^\ast).
-\]
 
 Da der Makespan minimiert wird, gilt äquivalent:
 \[
 C_{\max}(S') < C_{\max}(S^\ast).
 \]
 
-Die Suche endet, wenn mindestens eines der definierten Abbruchkriterien erfüllt ist. Dazu zählen das Erreichen der maximalen Gesamtzahl an Iterationen, das Erreichen der maximalen Anzahl an Iterationen ohne Verbesserung oder das Überschreiten eines gesetzten Zeitlimits.
