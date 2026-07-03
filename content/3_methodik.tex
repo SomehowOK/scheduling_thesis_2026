@@ -75,14 +75,14 @@ Wird eine Nachbarlösung akzeptiert, wird die aktuelle Lösung durch (S') ersetz
 
 
 %----------------------------------------------------------------------
-\section{Kritischer Pfad und kritische Blöcke}
+\subsection{Kritischer Pfad und kritische Blöcke}
 \label{sec:section}
 %----------------------------------------------------------------------
 Um den kritischen Pfad zu bestimmen, wird für jede Operation die Startzeit des Vorgängers gespeichert. Ausgehend von der Operation mit der größten Endzeit wird dieser Vorgängerpfad rückwärts verfolgt. Dadurch entsteht ein Pfad von Operationen, der den aktuellen Makespan bestimmt. Aus dem kritischen Pfad werden daraufhin kritische Blöcke extrahiert. Ein kritischer Block ist eine maximale Folge von Operationen, die auf dem kritischen Pfad liegen, auf derselben Maschine bearbeitet werden und dort direkt aufeinanderfolgen.  
 
 
 %----------------------------------------------------------------------
-\section{Nachbarschaftserzeugung}
+\subsection{Nachbarschaftserzeugung}
 \label{sec:section}
 %----------------------------------------------------------------------
 Die Nachbarschaft (NB(S)) besteht aus lokalen Veränderungen der Maschinenreihenfolgen. Im Mittelpunkt stehen Bewegungen innerhalb kritischer Blöcke. Dadurch konzentriert sich die Suche auf Bereiche, die den aktuellen Makespan beeinflussen. 
@@ -110,37 +110,3 @@ Tabelle 3: Vergleich mit OR-Tools
 - Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search 
 
 
-
-%----------------------------------------------------------------------
-\section{Forschungsdesign}
-\label{sec:section}
-%----------------------------------------------------------------------
-
-
-%----------------------------------------------------------------------
-\section{Implementierung}
-\label{sec:section}
-%----------------------------------------------------------------------
-
-
-
-In this chapter, after the \nameref{ch:data} chapter we're actually using some code!
-
-\begin{listing}[htbp]
-	\caption{This is an example of inline listing}
-	\label{lst:code1}
-	\begin{minted}{python}
-    x = 1
-    if x == 1:
-        # indented four spaces
-        print("x is 1.")
-    \end{minted}
-\end{listing}
-
-You can also include listings from a file directly:
-
-\begin{listing}[htbp]
-	\caption{This is an example of included listing}
-	\label{lst:code2}
-	\inputminted{python}{code/example.py}
-\end{listing}
