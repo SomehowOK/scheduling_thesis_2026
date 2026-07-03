@@ -8,20 +8,15 @@ Nach der gefunden Startlösung wird die Tabu-Search-Heuristik angewendet, um ein
 \label{alg:tabu_search}
 
 \begin{algorithmic}[1]
-\Require Startlösung $\hat{S}$, maximale Gesamtiteration $I_{\text{total}}^{\max}$, maximale Iterationen ohne Verbesserung $I^{\max}$, Diversifikationsschwelle $I^{\text{div}}$, Tabu-Dauer $TL^{\text{Dauer}}$, optionales Zeitlimit $\tau^{\max}$
-\Ensure Beste gefundene Lösung $S^\ast$
 
 \State $S \gets \hat{S}$
 \State $S^\ast \gets S$
 \State $TL \gets \emptyset$
 \State $I_{\text{total}} \gets 0$
 \State $I \gets 0$
+\State $\tau \gets 0$
 
-\If{$\tau^{\max}$ gesetzt ist}
-    \State starte Timer
-\EndIf
-
-\While{$I_{\text{total}} < I_{\text{total}}^{\max}$ \textbf{and} $I < I^{\max}$ \textbf{and} Zeitlimit nicht überschritten}
+\While{$I_{\text{total}} < I_{\text{total}}^{\max}$ \textbf{and} $I < I^{\max}$ \textbf{and} $\tau < \tau^{\max}$}
     \State $I_{\text{total}} \gets I_{\text{total}} + 1$
     \State Erzeuge die Nachbarschaft $NB(S)$ der aktuellen Lösung
 
@@ -29,23 +24,13 @@ Nach der gefunden Startlösung wird die Tabu-Search-Heuristik angewendet, um ein
         \State Ergänze zufällige nicht-kritische Bewegungen zu $NB(S)$
     \EndIf
 
-    \State Entferne unzulässige Nachbarlösungen aus $NB(S)$
-    \State Entferne tabuierte Bewegungen aus $NB(S)$, sofern keine Aspiration erfüllt ist
+    \For{$S' \in NB(S)$} (jede Nachbarlösung)
+        \If{$S'$ ist unzulässig \textbf{ or } (tabuiert \textbf{ and } Aspiration nicht erfüllt)}
+            \State Entferne $S'$ aus $NB(S)$
+        \EndIf
+    \EndFor
 
-    \If{$NB(S) = \emptyset$}
-        \State \textbf{break}
-    \EndIf
-
-    \State Bestimme die Menge der besten Kandidaten
-    \[
-        B(S) = \arg\min_{S' \in NB(S)} F(S')
-    \]
-
-    \If{$|B(S)| > 1$}
-        \State Wähle zufällig eine Nachbarlösung $S' \in B(S)$
-    \Else
-        \State Wähle die beste Nachbarlösung $S' \in B(S)$
-    \EndIf
+    \State Wähle die beste zulässige Nachbarlösung $S' \in NB(S)$
 
     \State $S \gets S'$
     \State Entferne abgelaufene Einträge aus $TL$
