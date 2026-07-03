@@ -1,0 +1,132 @@
+%----------------------------------------------------------------------
+\chapter{Methodik}
+\label{ch:methodik}
+%----------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------
+\section{Eröffnungsheuristik - Giffler-Thompson-Algorithmus}
+\label{sec:section}
+%----------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------
+\section{Metaheuristik - Tabu-Suche und Nachbarschaftsdefinitionen}
+\label{sec:section}
+%----------------------------------------------------------------------
+
+
+\begin{listing}[H]
+	\caption{Tabu Suche: Algorithmus}
+	\label{lst:code0}
+	\begin{minted}[
+		frame=single,
+		linenos,
+		numbersep=8pt,
+		fontsize=\small,
+		breaklines,
+		escapeinside=@@
+	]{text}
+	@\(S\)@ = @\(S^*\)@ = @\(\hat{S}\)@
+	I = 1
+	@\(I^{total}\)@ = 1
+	TL = {}
+
+	While NB(S) \ TL @\(\neq\)@ @\(\varnothing\)@ and I @\(\leq\)@ @\(I^{Max}\)@ do
+		waehle @\(S'^*\)@ @\(\epsilon\)@ NB(S) \ TL
+
+		If |TL| = @\(TL^{Dauer}\)@ then
+			TL = TL \ @\(S_1\)@
+
+		TL = TL @\(\cup\)@ @\(S\)@
+		@\(S\)@ = @\(S'^*\)@
+
+		If F(S'*) besser als F(@\(S^*\)@) then
+			@\(S^*\)@ = @\(S'^*\)@
+			I = 1
+		Else
+			I = I + 1
+	\end{minted}
+\end{listing}
+
+Die Suche beginnt mit der Erzeugung einer zulässigen Startlösung (S). Anschließend wird die beste gefundene Lösung mit (Ŝ = S) initialisiert. Danach werden die Tabu-Liste (TL), der Gesamtiterationszähler ($I^{total}$) und der Zähler für Iterationen ohne Verbesserung (I) initialisiert. Die Suche wird fortgeführt, bis ein Abbruchkriterium erfüllt ist. Der Gesamtiterationszähler wird in jedem Schleifendurchlauf um eins erhöht.  
+
+Der Algorithmus verwendet drei Abbruchkriterien. Erstens endet die Suche nach Erreichen der maximalen Gesamtzahl an Iterationen. Zweitens endet sie nach einer festgelegten Anzahl an Iterationen ohne Verbesserung. Drittens kann ein Zeitlimit gesetzt werden. Der Timer wird nur aktiviert, wenn beim Aufruf des Algorithmus ein Zeitlimit übergeben wird. 
+
+In jeder Iteration wird zunächst die Nachbarschaft (NB(S)) der aktuellen Lösung erzeugt. Ergänzend werden potenzielle Kandidatenbewegungen gebildet. Wird über mehrere Iterationen keine Verbesserung erzielt, werden zusätzliche zufällige nicht-kritische Bewegungen ergänzt. Diese dienen der Diversifikation der Suche. Liegen mehrere zulässige Kandidaten mit identischem Makespan vor, werden diese zufällig durchmischt. Dadurch soll ein Festlaufen in lokalen Optima reduziert werden. 
+
+Tabuierte Bewegungen werden verworfen, sofern die Aspirationsbedingung nicht erfüllt ist. Diese ist erfüllt, wenn eine tabuierte Bewegung zu einer Verbesserung der besten bisher gefundenen Lösung führt. Aus den verbleibenden Kandidaten wird die beste zulässige Nachbarlösung (S') ausgewählt. Existiert keine zulässige Nachbarlösung, wird die Suche beendet. 
+
+Wird eine Nachbarlösung akzeptiert, wird die aktuelle Lösung durch (S') ersetzt. Anschließend wird die Tabu-Liste mit der inversen Bewegung aktualisiert. Dadurch wird ein direktes Zurückkehren in den vorherigen Zustand verhindert. Ist die neue Lösung besser als die bisher beste Lösung, gilt also $(F(S) < F(S^*))$,  wird $(S^*)$ durch (S) ersetzt und der Verbesserungszähler zurückgesetzt. Andernfalls wird der Verbesserungszähler erhöht. Nach Abschluss der Suche wird die beste gefundene Lösung $(S^*)$ zurückgegeben.
+
+
+%----------------------------------------------------------------------
+\section{Kritischer Pfad und kritische Blöcke}
+\label{sec:section}
+%----------------------------------------------------------------------
+Um den kritischen Pfad zu bestimmen, wird für jede Operation die Startzeit des Vorgängers gespeichert. Ausgehend von der Operation mit der größten Endzeit wird dieser Vorgängerpfad rückwärts verfolgt. Dadurch entsteht ein Pfad von Operationen, der den aktuellen Makespan bestimmt. Aus dem kritischen Pfad werden daraufhin kritische Blöcke extrahiert. Ein kritischer Block ist eine maximale Folge von Operationen, die auf dem kritischen Pfad liegen, auf derselben Maschine bearbeitet werden und dort direkt aufeinanderfolgen.  
+
+
+%----------------------------------------------------------------------
+\section{Nachbarschaftserzeugung}
+\label{sec:section}
+%----------------------------------------------------------------------
+Die Nachbarschaft (NB(S)) besteht aus lokalen Veränderungen der Maschinenreihenfolgen. Im Mittelpunkt stehen Bewegungen innerhalb kritischer Blöcke. Dadurch konzentriert sich die Suche auf Bereiche, die den aktuellen Makespan beeinflussen. 
+
+In der Implementierung sind drei Nachbarschaftsvarianten vorgesehen. Die Adjacent-Critical-Nachbarschaft vertauscht benachbarte Operationen innerhalb eines kritischen Blocks. Die N5-Nachbarschaft vertauscht die ersten beiden und die letzten beiden Operationen eines kritischen Blocks. Die N6-Nachbarschaft erweitert N5 um Insert-Bewegungen. Dabei werden innere Operationen eines kritischen Blocks an den Blockanfang oder an das Blockende verschoben. 
+
+%----------------------------------------------------------------------
+\section{Hardwarespezifikationen}
+\label{sec:section}
+%----------------------------------------------------------------------
+Die Instanzen wurden auf einem Apple MacBook Pro aus dem Jahr 2023 ausgeführt. Das System ist mit einem Apple M3 Pro Prozessor sowie 18 GB gemeinsam genutztem Arbeitsspeicher ausgestattet. Da es sich beim M3 Pro um ein System-on-a-Chip handelt, sind CPU, GPU und Arbeitsspeicher eng integriert. Die Berechnungen wurden lokal auf dem Gerät durchgeführt, ohne zusätzliche externe Rechenressourcen oder Serverinfrastruktur zu verwenden.  
+
+
+
+Tabelle 1: Ergebnisse der Giffler-Thompson-Prioritätsregeln 
+
+- Prioritätsregel- Cmax- Laufzeit- Anzahl Rüstvorgänge oder gesamte Rüstzeit, falls relevant 
+
+Tabelle 2: Vergleich der Tabu-Search-Nachbarschaften 
+
+- Nachbarschaft- bester Cmax - durchschnittlicher Cmax- schlechtester Cmax - Standardabweichung- durchschnittliche Laufzeit- Anzahl Iterationen 
+
+Tabelle 3: Vergleich mit OR-Tools 
+
+- Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search 
+
+
+
+%----------------------------------------------------------------------
+\section{Forschungsdesign}
+\label{sec:section}
+%----------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------
+\section{Implementierung}
+\label{sec:section}
+%----------------------------------------------------------------------
+
+
+
+In this chapter, after the \nameref{ch:data} chapter we're actually using some code!
+
+\begin{listing}[htbp]
+	\caption{This is an example of inline listing}
+	\label{lst:code1}
+	\begin{minted}{python}
+    x = 1
+    if x == 1:
+        # indented four spaces
+        print("x is 1.")
+    \end{minted}
+\end{listing}
+
+You can also include listings from a file directly:
+
+\begin{listing}[htbp]
+	\caption{This is an example of included listing}
+	\label{lst:code2}
+	\inputminted{python}{code/example.py}
+\end{listing}
