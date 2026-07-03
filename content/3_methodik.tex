@@ -16,38 +16,52 @@
 %----------------------------------------------------------------------
 
 
-\begin{listing}[H]
-	\caption{Tabu Suche: Algorithmus}
-	\label{lst:code0}
-	\begin{minted}[
-		frame=single,
-		linenos,
-		numbersep=8pt,
-		fontsize=\small,
-		breaklines,
-		escapeinside=@@
-	]{text}
-	@\(S\)@ = @\(S^*\)@ = @\(\hat{S}\)@
-	I = 1
-	@\(I^{total}\)@ = 1
-	TL = {}
+\begin{algorithm}[H]
+\caption{Tabu Search für das Job-Shop-Scheduling-Problem mit sequenzabhängigen Rüstzeiten}
+\label{alg:tabu_search}
 
-	While NB(S) \ TL @\(\neq\)@ @\(\varnothing\)@ and I @\(\leq\)@ @\(I^{Max}\)@ do
-		waehle @\(S'^*\)@ @\(\epsilon\)@ NB(S) \ TL
+\begin{algorithmic}[1]
 
-		If |TL| = @\(TL^{Dauer}\)@ then
-			TL = TL \ @\(S_1\)@
+\State $S \gets \hat{S}$
+\State $S^\ast \gets S$
+\State $TL \gets \emptyset$
+\State $I_{\text{total}} \gets 0$
+\State $I \gets 0$
+\State $\tau \gets 0$
 
-		TL = TL @\(\cup\)@ @\(S\)@
-		@\(S\)@ = @\(S'^*\)@
+\While{$I_{\text{total}} < I_{\text{total}}^{\max}$ \textbf{and} $I < I^{\max}$ \textbf{and} $\tau < \tau^{\max}$}
+    \State $I_{\text{total}} \gets I_{\text{total}} + 1$
+    \State Erzeuge die Nachbarschaft $NB(S)$ der aktuellen Lösung
 
-		If F(S'*) besser als F(@\(S^*\)@) then
-			@\(S^*\)@ = @\(S'^*\)@
-			I = 1
-		Else
-			I = I + 1
-	\end{minted}
-\end{listing}
+    \If{$I \geq I^{\text{div}}$}
+        \State Ergänze zufällige nicht-kritische Bewegungen zu $NB(S)$
+    \EndIf
+
+    \For{$S' \in NB(S)$} (jede Nachbarlösung)
+        \If{$S'$ ist unzulässig \textbf{ or } (tabuiert \textbf{ and } Aspiration nicht erfüllt)}
+            \State Entferne $S'$ aus $NB(S)$
+        \EndIf
+    \EndFor
+
+    \State Wähle die beste zulässige Nachbarlösung $S' \in NB(S)$
+
+    \State $S \gets S'$
+    \State Entferne abgelaufene Einträge aus $TL$
+    \State $TL \gets TL \cup \{\text{inverse Bewegung von } S'\}$
+
+    \If{$F(S) < F(S^\ast)$}
+        \State $S^\ast \gets S$
+        \State $I \gets 0$
+    \Else
+        \State $I \gets I + 1$
+    \EndIf
+\EndWhile
+
+\State \Return $S^\ast$
+
+\end{algorithmic}
+\end{algorithm}
+
 
 Die Suche beginnt mit der Erzeugung einer zulässigen Startlösung (S). Anschließend wird die beste gefundene Lösung mit (Ŝ = S) initialisiert. Danach werden die Tabu-Liste (TL), der Gesamtiterationszähler ($I^{total}$) und der Zähler für Iterationen ohne Verbesserung (I) initialisiert. Die Suche wird fortgeführt, bis ein Abbruchkriterium erfüllt ist. Der Gesamtiterationszähler wird in jedem Schleifendurchlauf um eins erhöht.  
 
