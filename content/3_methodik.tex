@@ -11,7 +11,7 @@
 
 
 %----------------------------------------------------------------------
-\section{Metaheuristik - Tabu-Suche und Nachbarschaftsdefinitionen}
+\section{Metaheuristik - Tabu-Suche}
 \label{sec:section}
 %----------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ Der Algorithmus verwendet drei Abbruchkriterien. Erstens endet die Suche nach Er
 
 In jeder Iteration wird zunächst die Nachbarschaft (NB(S)) der aktuellen Lösung erzeugt. Ergänzend werden potenzielle Kandidatenbewegungen gebildet. Wird über mehrere Iterationen keine Verbesserung erzielt, werden zusätzliche zufällige nicht-kritische Bewegungen ergänzt. Diese dienen der Diversifikation der Suche. Liegen mehrere zulässige Kandidaten mit identischem Makespan vor, werden diese zufällig durchmischt. Dadurch soll ein Festlaufen in lokalen Optima reduziert werden. 
 
-Tabuierte Bewegungen werden verworfen, sofern die Aspirationsbedingung nicht erfüllt ist. Diese ist erfüllt, wenn eine tabuierte Bewegung zu einer Verbesserung der besten bisher gefundenen Lösung führt. Aus den verbleibenden Kandidaten wird die beste zulässige Nachbarlösung (S') ausgewählt. Existiert keine zulässige Nachbarlösung, wird die Suche beendet. 
+Tabuierte Bewegungen können trozdem verwendet werden, sofern die Aspirationsbedingung erfüllt ist. Diese ist erfüllt, wenn eine tabuierte Bewegung zu einer Verbesserung gesamt Laufzeit führt. Aus den verbleibenden Kandidaten wird die beste zulässige Nachbarlösung (S') ausgewählt. Existiert keine zulässige Nachbarlösung, wird die Suche beendet. 
 
 Wird eine Nachbarlösung akzeptiert, wird die aktuelle Lösung durch (S') ersetzt. Anschließend wird die Tabu-Liste mit der inversen Bewegung aktualisiert. Dadurch wird ein direktes Zurückkehren in den vorherigen Zustand verhindert. Ist die neue Lösung besser als die bisher beste Lösung, gilt also $(F(S) < F(S^*))$,  wird $(S^*)$ durch (S) ersetzt und der Verbesserungszähler zurückgesetzt. Andernfalls wird der Verbesserungszähler erhöht. Nach Abschluss der Suche wird die beste gefundene Lösung $(S^*)$ zurückgegeben.
 
@@ -78,35 +78,103 @@ Wird eine Nachbarlösung akzeptiert, wird die aktuelle Lösung durch (S') ersetz
 \subsection{Kritischer Pfad und kritische Blöcke}
 \label{sec:section}
 %----------------------------------------------------------------------
-Um den kritischen Pfad zu bestimmen, wird für jede Operation die Startzeit des Vorgängers gespeichert. Ausgehend von der Operation mit der größten Endzeit wird dieser Vorgängerpfad rückwärts verfolgt. Dadurch entsteht ein Pfad von Operationen, der den aktuellen Makespan bestimmt. Aus dem kritischen Pfad werden daraufhin kritische Blöcke extrahiert. Ein kritischer Block ist eine maximale Folge von Operationen, die auf dem kritischen Pfad liegen, auf derselben Maschine bearbeitet werden und dort direkt aufeinanderfolgen.  
+Die Bewertung einer Lösung erfolgt auf Basis eines disjunktiven Graphen.
+Jede Operation wird durch einen Knoten repräsentiert.
+Zwischen den Knoten existieren konjunktive Kanten für die technologische Reihenfolge innerhalb eines Jobs sowie disjunktive Kanten für die Bearbeitungsreihenfolge auf einer Maschine.
+Die konjunktiven Kanten sind durch die Instanz vorgegeben.
+Ihre Gewichte entsprechen den Bearbeitungszeiten der zugehörigen Operationen.
+Die Richtung der disjunktiven Kanten ist zunächst offen und wird erst durch die in der aktuellen Lösung festgelegten Maschinenreihenfolgen bestimmt.
+Auch diese Kanten tragen die Bearbeitungsdauer und gegebenenfalls zusätzliche sequenzabhängige Rüstzeiten.
+Sobald für jede Maschine eine zulässige Reihenfolge vorliegt, ist der resultierende Graph azyklisch.
+
+In diesem azyklischen Graphen entspricht die früheste Startzeit einer Operation der Länge des längsten Pfades von einer Quelle zu diesem Knoten.
+Die Funktion \texttt{evaluate\_orders(problem, orders)} bestimmt diese Werte mit einer um eine Longest-Path-Berechnung.
+Zunächst wird für jede Operation der Eingangsgrad bestimmt.
+Dabei besitzt eine Operation höchstens zwei unmittelbare Vorgänger, nämlich einen Job-Vorgänger und einen Maschinen-Vorgänger.
+Anschließend werden alle Operationen ohne Vorgänger mit Startzeit null in eine Warteschlange eingefügt.
+Wird eine Operation $u$ verarbeitet, werden ihre möglichen Nachfolger entlang beider Kantentypen relaxiert.
+Für jeden Nachfolger $v$ gilt
+\[
+start(v) = \max\left(start(v), completion(u) + s_{uv}\right),
+\]
+wobei $s_{uv}$ die zusätzliche Rüstzeit auf der betrachteten Maschinenkante bezeichnet und auf konjunktiven Kanten null ist.
+Die Maximumbildung ist erforderlich, weil eine Operation erst beginnen darf, wenn alle unmittelbaren Vorgänger abgeschlossen sind.
+Immer dann, wenn eine Relaxation den Startzeitwert eines Nachfolgers erhöht, wird der zugehörige Vorgänger als bindender Vorgänger gespeichert.
+Dieser Zeiger identifiziert genau die Kante, die die aktuelle früheste Startzeit bestimmt.
+
+Werden im Verlauf der topologischen Verarbeitung nicht alle Operationen besucht, enthält der disjunktive Graph einen Zyklus.
+Eine solche Reihenfolge ist unzulässig und wird verworfen.
+Nach Abschluss der Berechnung ergibt sich der Makespan $C_{\max}$ als maximale Fertigstellungszeit über alle Operationen.
+Der kritische Pfad wird anschließend durch Rückverfolgung der gespeicherten bindenden Vorgänger konstruiert.
+Ausgehend von einer Operation mit Fertigstellungszeit $C_{\max}$ wird iterativ zum jeweiligen Vorgänger zurückgegangen, bis eine Quelle erreicht ist.
+Die umgekehrte Folge dieser Operationen bildet einen kritischen Pfad.
+Die Summe seiner Kantengewichte entspricht exakt dem Makespan.
+
+Auf dieser Grundlage werden kritische Blöcke bestimmt.
+Ein kritischer Block ist eine maximale Teilfolge des kritischen Pfades, deren Operationen auf derselben Maschine liegen und dort unmittelbar aufeinanderfolgen.
+Diese Blöcke definieren den Suchraum der kritischkeitsbasierten Nachbarschaften.
+
+Die aktuelle Implementierung liefert bei mehreren gleich langen kritischen Pfaden nur einen einzelnen Pfad zurück.
+Dies folgt erstens aus der Wahl des Endknotens, da bei mehreren Operationen mit identischer maximaler Fertigstellungszeit nur der erste gefundene Endpunkt verwendet wird.
+Zweitens wird bei Gleichstand konkurrierender Vorgänger nur die zuerst verarbeitete bindende Kante gespeichert.
+Der berechnete Makespan bleibt dadurch korrekt.
+Eingeschränkt ist jedoch die nachgelagerte Nachbarschaftserzeugung, weil kritische Blöcke ausschließlich aus diesem einen Pfad extrahiert werden.
+Existieren mehrere voneinander unabhängige kritische Pfade, können erzeugte Bewegungen einen sichtbaren Pfad verändern, ohne den Makespan zu reduzieren, weil ein weiterer unbeachteter Pfad weiterhin bindend bleibt.
+Im vorliegenden Verfahren wird dieser Effekt nur teilweise abgeschwächt.
+Zusätzliche nicht-kritische Diversifikationszüge können nach längerer Stagnation indirekt einen weiteren kritischen Pfad treffen.
+Außerdem kann sich durch eine geänderte Reihenfolge in einer späteren Iteration ein anderer gleich langer Pfad als kritisch manifestieren.
+Eine vollständige Behandlung würde die gleichzeitige Identifikation aller Endoperationen mit Fertigstellungszeit $C_{\max}$ und die Berücksichtigung mehrerer kritischer Pfade in der Blockbildung erfordern.
 
 
 %----------------------------------------------------------------------
-\subsection{Nachbarschaftserzeugung}
+\subsection{Nachbarschaftsdefinitionen}
 \label{sec:section}
 %----------------------------------------------------------------------
-Die Nachbarschaft (NB(S)) besteht aus lokalen Veränderungen der Maschinenreihenfolgen. Im Mittelpunkt stehen Bewegungen innerhalb kritischer Blöcke. Dadurch konzentriert sich die Suche auf Bereiche, die den aktuellen Makespan beeinflussen. 
+Für die Tabu-Suche werden drei Nachbarschaftsdefinitionen verwendet, die auf dem kritischen Pfad basieren.
+Der kritische Pfad ist die Folge von Operationen, die den Makespan $C_{\max}$ bestimmt.
+Eine Verzögerung einer Operation auf diesem Pfad erhöht unmittelbar die Gesamtdauer.
+\cite{blazewicz_handbook_2019}
 
-In der Implementierung sind drei Nachbarschaftsvarianten vorgesehen. Die Adjacent-Critical-Nachbarschaft vertauscht benachbarte Operationen innerhalb eines kritischen Blocks. Die N5-Nachbarschaft vertauscht die ersten beiden und die letzten beiden Operationen eines kritischen Blocks. Die N6-Nachbarschaft erweitert N5 um Insert-Bewegungen. Dabei werden innere Operationen eines kritischen Blocks an den Blockanfang oder an das Blockende verschoben. 
+Zur Erzeugung von Bewegungen wird der kritische Pfad in kritische Blöcke zerlegt.
+Ein kritischer Block ist eine maximale Teilfolge von Operationen, die auf dem kritischen Pfad liegen und auf derselben Maschine unmittelbar aufeinanderfolgen.
+Die Funktion \texttt{critical\_blocks()} durchläuft den kritischen Pfad und fasst Operationen so lange zu einem Block zusammen, wie Maschinenzuordnung und unmittelbare Nachbarschaft erhalten bleiben.
+Bei Maschinenwechsel oder fehlender Adjazenz wird ein neuer Block begonnen.
+Blöcke mit weniger als zwei Operationen werden verworfen, da kein sinnvoller Tausch definiert ist.
+[PLATZHALTER: Zitat Konzept kritische Blöcke, z.B. Nowicki \& Smutnicki 1996]
+
+Die Einschränkung auf Operationen innerhalb kritischer Blöcke folgt der klassischen Eigenschaft, dass Verbesserungen des Makespans nur durch Änderungen innerhalb solcher Blöcke erreicht werden.
+Vertauschungen über Blockgrenzen hinweg reduzieren den Makespan nicht.
+[PLATZHALTER: Zitat, z.B. van Laarhoven, Aarts \& Lenstra 1992]
+
+Die Implementierung umfasst drei Nachbarschaften.
+
+\textbf{Adjacent-Swap-Nachbarschaft}.
+Für jeden kritischen Block werden alle benachbarten Operationspaare vertauscht.
+Ein Block $[A, B, C, D]$ erzeugt die Züge $(A,B)$, $(B,C)$ und $(C,D)$.
+Diese Variante betrachtet alle lokalen Adjazenzvertauschungen innerhalb kritischer Blöcke.
+[PLATZHALTER: Zitat]
+
+\textbf{N5-Nachbarschaft}.
+Pro kritischem Block werden nur die ersten beiden sowie die letzten beiden Operationen vertauscht.
+Ein Block $[A, B, C, D, E]$ erzeugt damit ausschließlich die Züge $(A,B)$ und $(D,E)$.
+Die Reduktion basiert auf dem Ergebnis, dass Randvertauschungen makespanwirksam sein können, während innere Vertauschungen diese Eigenschaft nicht besitzen.
+[PLATZHALTER: Zitat N5, z.B. Nowicki \& Smutnicki 1996, "A Fast Taboo Search Algorithm for the Job Shop Problem"]
+
+\textbf{N6-Nachbarschaft}.
+N6 erweitert N5 um Insert-Bewegungen.
+Zusätzlich zu den N5-Randvertauschungen kann jede innere Operation eines Blocks an den Blockanfang oder an das Blockende verschoben werden.
+Für den Block $[A, B, C, D, E]$ entstehen neben $(A,B)$ und $(D,E)$ beispielsweise die Sequenzen $[C, A, B, D, E]$ und $[A, C, D, E, B]$.
+Duplikate werden ausgeschlossen, wenn ein Insert-Zug äquivalent zu einem bereits enthaltenen N5-Zug ist.
+Diese Erweiterung vergrößert die strukturelle Diversität der Nachbarschaft bei weiterhin begrenzter Kandidatenzahl.
+[PLATZHALTER: Zitat N6, z.B. Balas \& Vazacopoulos 1998, "Guided local search with shifting bottleneck for job shop scheduling"]
 
 %----------------------------------------------------------------------
 \section{Hardwarespezifikationen}
 \label{sec:section}
 %----------------------------------------------------------------------
-Die Instanzen wurden auf einem Apple MacBook Pro aus dem Jahr 2023 ausgeführt. Das System ist mit einem Apple M3 Pro Prozessor sowie 18 GB gemeinsam genutztem Arbeitsspeicher ausgestattet. Da es sich beim M3 Pro um ein System-on-a-Chip handelt, sind CPU, GPU und Arbeitsspeicher eng integriert. Die Berechnungen wurden lokal auf dem Gerät durchgeführt, ohne zusätzliche externe Rechenressourcen oder Serverinfrastruktur zu verwenden.  
+Die Instanzen wurden auf einem Apple MacBook Pro aus dem Jahr 2023 ausgeführt. Das System ist mit einem Apple M3 Pro Prozessor sowie 18 GB gemeinsam genutztem Arbeitsspeicher ausgestattet. Die Berechnungen wurden lokal auf dem Gerät durchgeführt, ohne zusätzliche externe Rechenressourcen oder Serverinfrastruktur zu verwenden.  
 
 
 
-Tabelle 1: Ergebnisse der Giffler-Thompson-Prioritätsregeln 
-
-- Prioritätsregel- Cmax- Laufzeit- Anzahl Rüstvorgänge oder gesamte Rüstzeit, falls relevant 
-
-Tabelle 2: Vergleich der Tabu-Search-Nachbarschaften 
-
-- Nachbarschaft- bester Cmax - durchschnittlicher Cmax- schlechtester Cmax - Standardabweichung- durchschnittliche Laufzeit- Anzahl Iterationen 
-
-Tabelle 3: Vergleich mit OR-Tools 
-
-- Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search 
 
 
