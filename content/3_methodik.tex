@@ -63,44 +63,67 @@
 \end{algorithm}
 
 
-Die Suche beginnt mit der Erzeugung einer zulässigen Startlösung (S). Anschließend wird die beste gefundene Lösung mit (Ŝ = S) initialisiert. Danach werden die Tabu-Liste (TL), der Gesamtiterationszähler ($I^{total}$) und der Zähler für Iterationen ohne Verbesserung (I) initialisiert. Die Suche wird fortgeführt, bis ein Abbruchkriterium erfüllt ist. Der Gesamtiterationszähler wird in jedem Schleifendurchlauf um eins erhöht.  
+Die Suche startet mit einer zulässigen Startlösung $S$.
+Die bisher beste Lösung wird mit $S^\ast \gets S$ initialisiert.
+Zusätzlich werden Tabu-Liste $TL$, Gesamtiterationszähler $I_{\text{total}}$ und Verbesserungszähler $I$ initialisiert.
+Die Abbruchbedingungen sind maximale Gesamtiterationen, maximale Iterationen ohne Verbesserung und ein optionales Zeitlimit.
 
-Der Algorithmus verwendet drei Abbruchkriterien. Erstens endet die Suche nach Erreichen der maximalen Gesamtzahl an Iterationen. Zweitens endet sie nach einer festgelegten Anzahl an Iterationen ohne Verbesserung. Drittens kann ein Zeitlimit gesetzt werden. Der Timer wird nur aktiviert, wenn beim Aufruf des Algorithmus ein Zeitlimit übergeben wird. 
+Die Nachbarschaft $NB(S)$ wird in jeder Iteration aus einer als Parameter übergebenen Nachbarschaftsdefinition erzeugt.
+Zur Auswahl stehen Adjacent Swap in kritischen Blöcken, N5 und N6.
+Die gewählte Definition bestimmt Größe und Struktur der Kandidatenmenge.
 
-In jeder Iteration wird zunächst die Nachbarschaft (NB(S)) der aktuellen Lösung erzeugt. Ergänzend werden potenzielle Kandidatenbewegungen gebildet. Wird über mehrere Iterationen keine Verbesserung erzielt, werden zusätzliche zufällige nicht-kritische Bewegungen ergänzt. Diese dienen der Diversifikation der Suche. Liegen mehrere zulässige Kandidaten mit identischem Makespan vor, werden diese zufällig durchmischt. Dadurch soll ein Festlaufen in lokalen Optima reduziert werden. 
+Eine Nachbarlösung wird vor der Bewertung auf Zulässigkeit geprüft.
+Unzulässig sind Kandidaten, deren Bewegung im Dispositionsgraphen einen Zyklus erzeugt.
+Diese Kandidaten werden sofort verworfen.
 
-Tabuierte Bewegungen können trozdem verwendet werden, sofern die Aspirationsbedingung erfüllt ist. Diese ist erfüllt, wenn eine tabuierte Bewegung zu einer Verbesserung gesamt Laufzeit führt. Aus den verbleibenden Kandidaten wird die beste zulässige Nachbarlösung (S') ausgewählt. Existiert keine zulässige Nachbarlösung, wird die Suche beendet. 
+Die Tabu-Tenure ist fest auf $T_{\text{tabu}} = 20$ Iterationen gesetzt.
+Beim Eintrag einer inversen Bewegung in $TL$ wird die Verbotsdauer als Ablaufiteration gespeichert.
+Abgelaufene Einträge werden aus Effizienzgründen nicht in jeder Iteration entfernt, sondern periodisch alle 32 Iterationen bereinigt.
 
-Wird eine Nachbarlösung akzeptiert, wird die aktuelle Lösung durch (S') ersetzt. Anschließend wird die Tabu-Liste mit der inversen Bewegung aktualisiert. Dadurch wird ein direktes Zurückkehren in den vorherigen Zustand verhindert. Ist die neue Lösung besser als die bisher beste Lösung, gilt also $(F(S) < F(S^*))$,  wird $(S^*)$ durch (S) ersetzt und der Verbesserungszähler zurückgesetzt. Andernfalls wird der Verbesserungszähler erhöht. Nach Abschluss der Suche wird die beste gefundene Lösung $(S^*)$ zurückgegeben.
+Vor der Auswahl wird die gesamte Kandidatenliste $NB(S)$ zufällig permutiert.
+Anschließend wird die erste beste gefundene zulässige Nachbarlösung übernommen.
+Dadurch entsteht bei mehreren gleichwertigen Kandidaten eine zufällige Tie-Break-Regel.
+
+Tabuierte Bewegungen werden nur akzeptiert, wenn das Aspirationskriterium erfüllt ist.
+Die Bedingung lautet $F(S') < F(S^\ast)$.
+Damit bezieht sich die Aspiration auf die bisher beste Lösung und nicht auf die aktuelle Lösung.
+
+Bleibt nach Zulässigkeits- und Tabu-Filterung kein Kandidat übrig, wird einmalig eine Menge zufälliger nicht-kritischer Bewegungen erzeugt.
+Dieser Fallback erfolgt unabhängig von $I^{\text{div}}$.
+Die zusätzlichen Kandidaten werden erneut auf Zulässigkeit und Tabu-Status geprüft.
+Erst wenn auch dann keine zulässige Bewegung existiert, wird die Suche beendet.
+
+Wird eine Nachbarlösung $S'$ akzeptiert, wird $S \gets S'$ gesetzt und die inverse Bewegung in $TL$ eingetragen.
+Falls $F(S) < F(S^\ast)$ gilt, wird $S^\ast \gets S$ gesetzt und $I \gets 0$.
+Andernfalls wird $I \gets I + 1$ gesetzt.
+Nach Abschluss der Suche wird $S^\ast$ zurückgegeben.
 
 
 %----------------------------------------------------------------------
 \subsection{Kritischer Pfad und kritische Blöcke}
 \label{sec:section}
 %----------------------------------------------------------------------
-Die Bewertung einer Lösung erfolgt auf Basis eines disjunktiven Graphen.
+Die Bewertung einer Lösung erfolgt auf Basis eines disjunktiven Graphen. Eine solche Modellierung als kann auf die Arbeiten von Balas (1969) \cite{balas_machine_1969} zurückgeführt werden.
 Jede Operation wird durch einen Knoten repräsentiert.
 Zwischen den Knoten existieren konjunktive Kanten für die technologische Reihenfolge innerhalb eines Jobs sowie disjunktive Kanten für die Bearbeitungsreihenfolge auf einer Maschine.
-Die konjunktiven Kanten sind durch die Instanz vorgegeben.
-Ihre Gewichte entsprechen den Bearbeitungszeiten der zugehörigen Operationen.
-Die Richtung der disjunktiven Kanten ist zunächst offen und wird erst durch die in der aktuellen Lösung festgelegten Maschinenreihenfolgen bestimmt.
-Auch diese Kanten tragen die Bearbeitungsdauer und gegebenenfalls zusätzliche sequenzabhängige Rüstzeiten.
+Die konjunktiven Kanten sind durch die Jobs der Instanz vorgegeben.
+Wohingegen die Richtung der disjunktiven Kanten zunächst offen und erst durch die in der aktuellen Lösung festgelegten Maschinenreihenfolgen bestimmt wird.
+Diese Kanten tragen die Bearbeitungsdauer und die zusätzlichen sequenzabhängige Rüstzeiten.
 Sobald für jede Maschine eine zulässige Reihenfolge vorliegt, ist der resultierende Graph azyklisch.
 
-In diesem azyklischen Graphen entspricht die früheste Startzeit einer Operation der Länge des längsten Pfades von einer Quelle zu diesem Knoten.
-Die Funktion \texttt{evaluate\_orders(problem, orders)} bestimmt diese Werte mit einer um eine Longest-Path-Berechnung.
+In dem azyklischen Graphen entspricht die früheste Startzeit einer Operation der Länge des längsten Pfades von einer Quelle zu diesem Knoten.
+Die Funktion \texttt{evaluate\_orders(problem, orders)} berechnet diese Startzeiten durch eine Longest-Path-Berechnung.
 Zunächst wird für jede Operation der Eingangsgrad bestimmt.
-Dabei besitzt eine Operation höchstens zwei unmittelbare Vorgänger, nämlich einen Job-Vorgänger und einen Maschinen-Vorgänger.
+Eine Operation besitzt höchstens zwei unmittelbare Vorgänger: einen Job-Vorgänger und einen Maschinen-Vorgänger.
 Anschließend werden alle Operationen ohne Vorgänger mit Startzeit null in eine Warteschlange eingefügt.
-Wird eine Operation $u$ verarbeitet, werden ihre möglichen Nachfolger entlang beider Kantentypen relaxiert.
+Bei der Verarbeitung einer Operation $u$ werden ihre Nachfolger entlang beider Kantentypen relaxiert.
 Für jeden Nachfolger $v$ gilt
 \[
 start(v) = \max\left(start(v), completion(u) + s_{uv}\right),
 \]
 wobei $s_{uv}$ die zusätzliche Rüstzeit auf der betrachteten Maschinenkante bezeichnet und auf konjunktiven Kanten null ist.
-Die Maximumbildung ist erforderlich, weil eine Operation erst beginnen darf, wenn alle unmittelbaren Vorgänger abgeschlossen sind.
-Immer dann, wenn eine Relaxation den Startzeitwert eines Nachfolgers erhöht, wird der zugehörige Vorgänger als bindender Vorgänger gespeichert.
-Dieser Zeiger identifiziert genau die Kante, die die aktuelle früheste Startzeit bestimmt.
+Die Maximumbildung stellt sicher, dass eine Operation erst startet, wenn alle unmittelbaren Vorgänger abgeschlossen sind.
+Erhöht eine Relaxation den Startzeitwert eines Nachfolgers, wird der auslösende Vorgänger als bindender Vorgänger gespeichert.
 
 Werden im Verlauf der topologischen Verarbeitung nicht alle Operationen besucht, enthält der disjunktive Graph einen Zyklus.
 Eine solche Reihenfolge ist unzulässig und wird verworfen.
@@ -112,7 +135,7 @@ Die Summe seiner Kantengewichte entspricht exakt dem Makespan.
 
 Auf dieser Grundlage werden kritische Blöcke bestimmt.
 Ein kritischer Block ist eine maximale Teilfolge des kritischen Pfades, deren Operationen auf derselben Maschine liegen und dort unmittelbar aufeinanderfolgen.
-Diese Blöcke definieren den Suchraum der kritischkeitsbasierten Nachbarschaften.
+Diese Blöcke definieren den Suchraum der kritischkeitsbasierten Nachbarschaften \cite{nowicki_fast_1996}. 
 
 Die aktuelle Implementierung liefert bei mehreren gleich langen kritischen Pfaden nur einen einzelnen Pfad zurück.
 Dies folgt erstens aus der Wahl des Endknotens, da bei mehreren Operationen mit identischer maximaler Fertigstellungszeit nur der erste gefundene Endpunkt verwendet wird.
@@ -140,11 +163,11 @@ Ein kritischer Block ist eine maximale Teilfolge von Operationen, die auf dem kr
 Die Funktion \texttt{critical\_blocks()} durchläuft den kritischen Pfad und fasst Operationen so lange zu einem Block zusammen, wie Maschinenzuordnung und unmittelbare Nachbarschaft erhalten bleiben.
 Bei Maschinenwechsel oder fehlender Adjazenz wird ein neuer Block begonnen.
 Blöcke mit weniger als zwei Operationen werden verworfen, da kein sinnvoller Tausch definiert ist.
-[PLATZHALTER: Zitat Konzept kritische Blöcke, z.B. Nowicki \& Smutnicki 1996]
+\cite{nowicki_fast_1996}
 
 Die Einschränkung auf Operationen innerhalb kritischer Blöcke folgt der klassischen Eigenschaft, dass Verbesserungen des Makespans nur durch Änderungen innerhalb solcher Blöcke erreicht werden.
 Vertauschungen über Blockgrenzen hinweg reduzieren den Makespan nicht.
-[PLATZHALTER: Zitat, z.B. van Laarhoven, Aarts \& Lenstra 1992]
+\cite{peter_j_m_van_laarhoven_job_1992}
 
 Die Implementierung umfasst drei Nachbarschaften.
 
@@ -152,13 +175,13 @@ Die Implementierung umfasst drei Nachbarschaften.
 Für jeden kritischen Block werden alle benachbarten Operationspaare vertauscht.
 Ein Block $[A, B, C, D]$ erzeugt die Züge $(A,B)$, $(B,C)$ und $(C,D)$.
 Diese Variante betrachtet alle lokalen Adjazenzvertauschungen innerhalb kritischer Blöcke.
-[PLATZHALTER: Zitat]
+\cite{peter_j_m_van_laarhoven_job_1992}
 
 \textbf{N5-Nachbarschaft}.
 Pro kritischem Block werden nur die ersten beiden sowie die letzten beiden Operationen vertauscht.
 Ein Block $[A, B, C, D, E]$ erzeugt damit ausschließlich die Züge $(A,B)$ und $(D,E)$.
 Die Reduktion basiert auf dem Ergebnis, dass Randvertauschungen makespanwirksam sein können, während innere Vertauschungen diese Eigenschaft nicht besitzen.
-[PLATZHALTER: Zitat N5, z.B. Nowicki \& Smutnicki 1996, "A Fast Taboo Search Algorithm for the Job Shop Problem"]
+\cite{nowicki_1996}
 
 \textbf{N6-Nachbarschaft}.
 N6 erweitert N5 um Insert-Bewegungen.
@@ -166,7 +189,7 @@ Zusätzlich zu den N5-Randvertauschungen kann jede innere Operation eines Blocks
 Für den Block $[A, B, C, D, E]$ entstehen neben $(A,B)$ und $(D,E)$ beispielsweise die Sequenzen $[C, A, B, D, E]$ und $[A, C, D, E, B]$.
 Duplikate werden ausgeschlossen, wenn ein Insert-Zug äquivalent zu einem bereits enthaltenen N5-Zug ist.
 Diese Erweiterung vergrößert die strukturelle Diversität der Nachbarschaft bei weiterhin begrenzter Kandidatenzahl.
-[PLATZHALTER: Zitat N6, z.B. Balas \& Vazacopoulos 1998, "Guided local search with shifting bottleneck for job shop scheduling"]
+\cite{Balas&Vazacopoulos}
 
 %----------------------------------------------------------------------
 \section{Hardwarespezifikationen}
