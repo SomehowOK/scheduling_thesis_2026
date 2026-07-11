@@ -73,20 +73,9 @@ Falls eine Nachfolgeoperation $o_{j',\, k'+1}$ im selben Job existiert, wird der
 Abschließend wird die geplante Operation $o'$ aus der Menge $U$ entfernt.
 Der Algorithmus terminiert, sobald alle Operationen eingeplant wurden und somit $U = \emptyset$ gilt.
 
-Da in jeder Iteration des Algorithmus Konflikte zwischen einplanbaren Operationen auf derselben Maschine auftreten können, werden Prioritätsregeln eingesetzt, um diese Konflikte aufzulösen.
-Die Wahl der Prioritätsregel hat dabei einen maßgeblichen Einfluss auf die Qualität des resultierenden Ablaufplans (den Makespan $C_{\max}$).
+Da in jeder Iteration des Algorithmus Konflikte zwischen den einplanbaren Operationen auf derselben Maschine auftreten können, werden Prioritätsregeln eingesetzt, um diese Konflikte aufzulösen.
+Die Wahl der Prioritätsregel hat dabei einen maßgeblichen Einfluss auf den initialen Makespan, wie in Kapitel \ref{sec:ergebnisse_eroeffnungsheuristik} aufgezeigt wird.
 
-Zu Beginn wurden acht verschiedene Prioritätsregeln für das Problem untersucht.
-Zunächst einfache Regeln, die sich auf eine einzelne Eigenschaft einer Operation beziehen.
-\begin{enumerate}
-    \item \textbf{Shortest Processing Time (SPT)}, dass die Operationen nach aufsteigender Prozessdauer sortiert
-    \item \textbf{Shortest Processing Time + Setup (SPTS)}, dass zusätzlich zur Prozessdauer die Rüstzeit betrachtet
-    \item \textbf{Longest Processing Time (LPT)}, dass Operationen nach absteigender Prozessdauer sortiert
-    \item \textbf{First Job (FJ)}, dass die Operationen nach ihrem Index sortiert
-\end{enumerate}
-
-Hier weitere Prio Regeln einfügen und erklären
-%\textit{Minimum Start Time} (MINSTART), dass die Operationen mit dem frühestmöglichen Startzeitpunkt zuerst geplant werden, und \textit{Minimum End Time} (MINEND), bei dem die Operationen mit dem frühestmöglichen Endzeitpunkt zuerst geplant werden, als auch komplexere kombinierte Heuristiken, welche die Einsatzmöglichkeiten von flexiblen Maschinen (Flexible Job Shop Scheduling) ausnutzen.
 
 %----------------------------------------------------------------------
 \section{Metaheuristik - Tabu-Suche}
@@ -263,7 +252,7 @@ Die Reduktion basiert auf dem Ergebnis, dass Randvertauschungen makespanwirksam 
 
 \textbf{N6-Nachbarschaft}.
 N6 erweitert N5 um Insert-Bewegungen.
-Zusätzlich zu den N5-Randvertauschungen kann jede innere Operation eines Blocks an den Blockanfang oder an das Blockende verschoben werden.
+Zusätzlich zu den N5-Randver-tauschungen kann jede innere Operation eines Blocks an den Blockanfang oder an das Blockende verschoben werden.
 Für den Block $[A, B, C, D, E]$ entstehen neben $(A,B)$ und $(D,E)$ beispielsweise die Sequenzen $[C, A, B, D, E]$ und $[A, C, D, E, B]$.
 Duplikate werden ausgeschlossen, wenn ein Insert-Zug äquivalent zu einem bereits enthaltenen N5-Zug ist.
 Diese Erweiterung vergrößert die strukturelle Diversität der Nachbarschaft bei weiterhin begrenzter Kandidatenzahl.
