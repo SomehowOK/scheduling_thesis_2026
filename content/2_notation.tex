@@ -8,75 +8,107 @@ In diesem Kapitel wird die Notation für das betrachtete Job-Shop-Scheduling-Pro
 
 Gegeben ist eine Menge von Jobs \(J\) und eine Menge von Maschinen \(M\). Jeder Job \(j \in J\) besteht aus einer geordneten Folge von Operationen
 \[
-O_j = (o_{j,1}, o_{j,2}, \dots, o_{j,q_j}).
+    O_j = (o_{j,1}, o_{j,2}, \dots, o_{j,q_j}).
 \]
 Die Reihenfolge der Operationen innerhalb eines Jobs ist vorgegeben. Eine Operation \(o_{j,k}\) darf daher erst beginnen, wenn ihre direkte Vorgängeroperation \(o_{j,k-1}\) abgeschlossen ist.
 
 Jede Operation \(o_{j,k}\) wird auf genau einer Maschine \(m_{j,k} \in M\) bearbeitet und besitzt eine Bearbeitungszeit \(p_{j,k}\). Zwischen zwei Operationen, die auf derselben Maschine direkt aufeinanderfolgen, kann eine sequenzabhängige Rüstzeit \(s_{u,v}\) anfallen. Diese hängt von der vorherigen Operation \(u\) und der nachfolgenden Operation \(v\) ab.
 
 \begin{table}[H]
-\centering
-\caption{Notation des Job-Shop-Scheduling-Problems}
-\label{tab:notation_problem}
-\begin{tabular}{ll}
-\hline
-\textbf{Symbol} & \textbf{Bedeutung} \\
-\hline
-\(J\) & Menge der Jobs \\
-\(j\) & Index eines Jobs, \(j \in J\) \\
-\(M\) & Menge der Maschinen \\
-\(m\) & Index einer Maschine, \(m \in M\) \\
-\(O_j\) & geordnete Menge der Operationen von Job \(j\) \\
-\(o_{j,k}\) & \(k\)-te Operation von Job \(j\) \\
-\(q_j\) & Anzahl der Operationen von Job \(j\) \\
-\(O\) & Menge aller Operationen \\
-\(m_{j,k}\) & Maschine, auf der Operation \(o_{j,k}\) bearbeitet wird \\
-\(p_{j,k}\) & Bearbeitungszeit der Operation \(o_{j,k}\) \\
-\(s_{u,v}\) & Rüstzeit zwischen zwei direkt aufeinanderfolgenden Operationen \(u\) und \(v\) \\
-\(t(o)\) & Startzeit der Operation \(o\) \\
-\(C(o)\) & Endzeit der Operation \(o\) \\
-\(C_{\max}\) & Makespan einer Lösung \\
-\(F(S)\) & Zielfunktionswert der Lösung \(S\) \\
-\hline
-\end{tabular}
+    \centering
+    \caption{Notation des Job-Shop-Scheduling-Problems}
+    \label{tab:notation_problem}
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Symbol} & \textbf{Bedeutung}                                                             \\
+        \hline
+        \(J\)           & Menge der Jobs                                                                 \\
+        \(j\)           & Index eines Jobs, \(j \in J\)                                                  \\
+        \(M\)           & Menge der Maschinen                                                            \\
+        \(m\)           & Index einer Maschine, \(m \in M\)                                              \\
+        \(O_j\)         & geordnete Menge der Operationen von Job \(j\)                                  \\
+        \(o_{j,k}\)     & \(k\)-te Operation von Job \(j\)                                               \\
+        \(q_j\)         & Anzahl der Operationen von Job \(j\)                                           \\
+        \(O\)           & Menge aller Operationen                                                        \\
+        \(m_{j,k}\)     & Maschine, auf der Operation \(o_{j,k}\) bearbeitet wird                        \\
+        \(p_{j,k}\)     & Bearbeitungszeit der Operation \(o_{j,k}\)                                     \\
+        \(s_{u,v}\)     & Rüstzeit zwischen zwei direkt aufeinanderfolgenden Operationen \(u\) und \(v\) \\
+        \(t(o)\)        & Startzeit der Operation \(o\)                                                  \\
+        \(C(o)\)        & Endzeit der Operation \(o\)                                                    \\
+        \(C_{\max}\)    & Makespan einer Lösung                                                          \\
+        \(F(S)\)        & Zielfunktionswert der Lösung \(S\)                                             \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\section*{Notation der Eröffnungsheuristik}
+
+Zur Erzeugung einer zulässigen Startlösung wird der Giffler-Thompson-Algorithmus verwendet. Für die mathematische Formulierung dieses Verfahrens werden folgende zusätzliche Symbole und Hilfsvariablen benötigt:
+
+\begin{table}[H]
+    \centering
+    \caption{Notation der Eröffnungsheuristik (Giffler-Thompson-Algorithmus)}
+    \label{tab:notation_gt}
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Symbol} & \textbf{Bedeutung}                                              \\
+        \hline
+        \(U\)           & Menge der noch unverplanten Operationen, \(U \subseteq O\)      \\
+        \(L_m\)         & aktuelle Last der Maschine \(m \in M\)                          \\
+        \(\lambda(m)\)  & Index des zuletzt auf Maschine \(m\) eingeplanten Jobs          \\
+        \(r(o)\)        & frühestmöglicher Startzeitpunkt von Operation \(o\)             \\
+        \(r_m(o)\)      & frühestmöglicher Maschinen-Startzeitpunkt von Operation \(o\)   \\
+        \(C^*\)         & minimaler frühestmöglicher Endzeitpunkt der aktuellen Iteration \\
+        \(m^*\)         & kritische Maschine, auf der \(C^*\) erreicht wird               \\
+        \(K\)           & Konfliktmenge einplanbarer Operationen auf Maschine \(m^*\)     \\
+        \(\pi\)         & angewendete Prioritätsregel                                     \\
+        \hline
+    \end{tabular}
 \end{table}
 
 
 \section*{Notation der Tabu-Suche}
 
-Zur Lösung des Problems wird eine Tabu-Search-Heuristik verwendet. Die aktuelle Lösung wird mit \(S\) bezeichnet. Die beste bisher gefundene Lösung wird als \(S^\ast\) notiert. Die Nachbarschaft der aktuellen Lösung wird durch \(NB(S)\) beschrieben. Sie enthält alle Lösungen, die durch zulässige lokale Bewegungen aus \(S\) erzeugt werden können.
+Zur Lösung des Problems wird eine Tabu-Search-Heuristik verwendet. Die aktuelle Lösung wird mit \(S\) bezeichnet.
+Sie wird im Vorfeld durch den Giffler-Thompson-Algorithmus erzeugt.
+Die beste bisher gefundene Lösung wird als \(S^\ast\) notiert.
+Die Nachbarschaft der aktuellen Lösung wird durch \(NB(S)\) beschrieben.
+Sie enthält alle Lösungen, die durch zulässige lokale Bewegungen aus \(S\) erzeugt werden können.
 
-Die Tabu-Liste \(TL\) speichert Bewegungsattribute, die für eine begrenzte Anzahl von Iterationen tabu sind. Dadurch wird ein unmittelbares Zurückkehren in vorherige Lösungen verhindert. Tabuierte Bewegungen können durch das Aspirationskriterium zugelassen werden, wenn sie zu einer neuen globalen Bestlösung führen.
+Die Tabu-Liste \(TL\) speichert Bewegungsattribute, die für eine begrenzte Anzahl von Iterationen tabu sind.
+Dadurch wird ein unmittelbares Zurückkehren in vorherige Lösungen verhindert.
+Tabuierte Bewegungen können durch das Aspirationskriterium zugelassen werden, wenn sie zu einer neuen globalen Bestlösung führen.
 
 \begin{table}[H]
-\centering
-\caption{Notation der Tabu-Search-Heuristik}
-\label{tab:notation_tabu}
-\begin{tabular}{ll}
-\hline
-\textbf{Symbol} & \textbf{Bedeutung} \\
-\hline
-\(\hat{S}\) & erzeugte Startlösung \\
-\(S\) & aktuelle Lösung \\
-\(S^\ast\) & beste bisher gefundene Lösung \\
-\(S'\) & Nachbarlösung der aktuellen Lösung \\
-\(NB(S)\) & Nachbarschaft der aktuellen Lösung \(S\) \\
-\(TL\) & Tabu-Liste \\
-\(TL^{\text{Dauer}}\) & Gültigkeitsdauer eines Tabu-Eintrags \\
-\(I\) & Anzahl der Iterationen ohne Verbesserung \\
-\(I^{\max}\) & maximale Anzahl an Iterationen ohne Verbesserung \\
-\(I_{\text{total}}\) & Gesamtzahl der Iterationen \\
-\(I_{\text{total}}^{\max}\) & maximale Gesamtzahl an Iterationen \\
-\(I^{\text{Diversifikation}}\) & Schwelle für zusätzliche Diversifikationsbewegungen \\
-\(\tau^{\max}\) & optionales Zeitlimit \\
-\(F(S)\) & Zielfunktionswert der Lösung \(S\) \\
-\hline
-\end{tabular}
+    \centering
+    \caption{Notation der Tabu-Search-Heuristik}
+    \label{tab:notation_tabu}
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Symbol}                & \textbf{Bedeutung}                                  \\
+        \hline
+        \(\hat{S}\)                    & erzeugte Startlösung                                \\
+        \(S\)                          & aktuelle Lösung                                     \\
+        \(S^\ast\)                     & beste bisher gefundene Lösung                       \\
+        \(S'\)                         & Nachbarlösung der aktuellen Lösung                  \\
+        \(NB(S)\)                      & Nachbarschaft der aktuellen Lösung \(S\)            \\
+        \(TL\)                         & Tabu-Liste                                          \\
+        \(TL^{\text{Dauer}}\)          & Gültigkeitsdauer eines Tabu-Eintrags                \\
+        \(I\)                          & Anzahl der Iterationen ohne Verbesserung            \\
+        \(I^{\max}\)                   & maximale Anzahl an Iterationen ohne Verbesserung    \\
+        \(I_{\text{total}}\)           & Gesamtzahl der Iterationen                          \\
+        \(I_{\text{total}}^{\max}\)    & maximale Gesamtzahl an Iterationen                  \\
+        \(I^{\text{Diversifikation}}\) & Schwelle für zusätzliche Diversifikationsbewegungen \\
+        \(\tau^{\max}\)                & optionales Zeitlimit                                \\
+        \(F(S)\)                       & Zielfunktionswert der Lösung \(S\)                  \\
+        \hline
+    \end{tabular}
 \end{table}
 
 
 Da der Makespan minimiert wird, gilt äquivalent:
 \[
-C_{\max}(S') < C_{\max}(S^\ast).
+    C_{\max}(S') < C_{\max}(S^\ast).
 \]
 

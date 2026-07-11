@@ -5,17 +5,60 @@
 
 %----------------------------------------------------------------------
 \section{Problemstellung}
-\label{sec:section}
+\label{sec:problemstellung}
 %----------------------------------------------------------------------
+In dieser Arbeit wird eine Metaheuristik für das Job-Shop-Scheduling-Problem mit sequenzabhängigen Rüstzeiten entwickelt und evaluiert.
+Dieses Problem gehört zur Klasse der NP-schweren Optimierungsprobleme.
+Die Problemstellung befasst sich mit der zeitlichen Einplanung einer Menge von Jobs auf einer festgelegten Menge von Maschinen.
+Jeder Job besteht aus einer strikten Abfolge von einzelnen Operationen.
+Die technologische Reihenfolge dieser Operationen ist durch die Problemstellung fest vorgegeben.
+Eine Maschine kann zu jedem Zeitpunkt höchstens eine Operation gleichzeitig bearbeiten.
 
+Eine wesentliche praxisrelevante Erweiterung stellen die sequenzabhängigen Rüstzeiten dar.
+Diese Rüstzeiten fallen an, wenn zwei Operationen unterschiedlicher Jobs direkt nacheinander auf derselben Maschine verarbeitet werden.
+Die Dauer des Rüstvorgangs hängt dabei explizit von der Reihenfolge der beiden Jobs ab.
+Das primäre Ziel der Problemstellung ist die Ermittlung eines zulässigen Ablaufplans.
+Hierbei müssen die optimalen Startzeiten für alle Operationen bestimmt werden.
+Die Zielfunktion verlangt die Minimierung der Gesamtproduktionsdauer, auch als Makespan \(C_{\max}\) bezeichnet.
+Durch die zusätzlichen Rüstzeiten vergrößert sich der kombinatorische Suchraum erheblich.
+Exakte Lösungsverfahren stoßen daher bei größeren Probleminstanzen schnell an ihre Grenzen.
 %----------------------------------------------------------------------
 \section{Zielsetzung}
-\label{sec:section}
+\label{sec:zielsetzung}
 %----------------------------------------------------------------------
+Die primäre Zielsetzung dieser Arbeit ist die Entwicklung und Evaluierung einer Metaheuristik zur Lösung des Job-Shop-Scheduling-Problems mit sequenzabhängigen Rüstzeiten.
+Als algorithmischer Ansatz wird hierfür eine Tabu-Suche implementiert.
+Im Zentrum der Untersuchung steht die Beantwortung der Frage, wie sich die Wahl der Nachbarschaftsdefinition auf den resultierenden Makespan auswirkt.
+Dazu werden drei unterschiedliche Nachbarschaftsstrukturen systematisch analysiert und miteinander verglichen.
 
-Wie beeinflusst die Wahl der Nachbarschaftsdefinition in einer Tabu Suche den Makespan von Job-Shop-Scheduling-Problemen mit reihenfolgeabhängigen Rüstzeiten? 
+Konkret betrifft dies die Adjacent-Swap-, die N5- und die N6-Nachbarschaft.
+Ein wichtiges Teilziel ist zudem die Implementierung einer geeigneten Eröffnungsheuristik.
+Hierfür wird der Giffler-Thompson-Algorithmus genutzt, um zulässige Startlösungen für das Suchverfahren bereitzustellen.
+Zur Validierung der Leistungsfähigkeit wird die Tabu-Suche auf ein vorgegebenes Testset angewendet.
 
+Die Ergebnisse werden anschließend einer quantitativen Analyse unterzogen.
+Als Performance-Referenz dient dabei ein exakter CP-Solver auf Basis der Google OR-Tools.
+Ziel ist es, die Stärken und Schwächen der jeweiligen Nachbarschaften hinsichtlich der Lösungsqualität und der benötigten Rechenzeit systematisch offenzulegen.
 %----------------------------------------------------------------------
 \section{Aufbau der Arbeit}
-\label{sec:section}
+\label{sec:aufbau}
 %----------------------------------------------------------------------
+Diese Arbeit gliedert sich in fünf Kapitel.
+Nach der Einleitung führt Kapitel 2 die mathematische Notation für das betrachtete Job-Shop-Scheduling-Problem ein.
+Diese dient als formale Grundlage für die Algorithmen und die zugehörige Bewertungslogik.
+Dabei werden die Symbole für das Kernproblem, die Eröffnungsheuristik und die Tabu-Suche definiert.
+
+Kapitel 3 beschreibt die methodische Umsetzung der Lösungsverfahren.
+Zunächst wird der Giffler-Thompson-Algorithmus zur Erzeugung zulässiger Startlösungen vorgestellt.
+
+Anschließend wird die Funktionsweise der Tabu-Suche dargelegt.
+Dies umfasst die Berechnung des kritischen Pfades, die Extraktion kritischer Blöcke sowie die Definition der Nachbarschaften Adjacent-Swap, N5 und N6.
+Den Abschluss bilden die Hard- und Softwarespezifikationen.
+
+Kapitel 4 präsentiert die Ergebnisse der Evaluation.
+Hierbei wird zunächst die Leistung der verschiedenen Prioritätsregeln ausgewertet.
+Zudem werden die drei Nachbarschaftsdefinitionen quantitativ miteinander verglichen.
+Die Leistungsfähigkeit der Metaheuristik wird schließlich durch den Vergleich mit einem exakten CP-Solver validiert.
+
+Kapitel 5 schließt die Arbeit mit einer kritischen Diskussion der Ergebnisse ab.
+Dabei werden die Stärken und Schwächen der jeweiligen Nachbarschaften hinsichtlich Lösungsqualität und Rechenzeit systematisch offengelegt.

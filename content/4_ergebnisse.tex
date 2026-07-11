@@ -2,15 +2,24 @@
 \chapter{Ergebnisse}
 \label{ch:ergebnisse}
 %----------------------------------------------------------------------
-Tabelle 1: Ergebnisse der Giffler-Thompson-Prioritätsregeln 
+Tabelle 1: Ergebnisse der Giffler-Thompson-Prioritätsregeln
 
-- Prioritätsregel- Cmax- Laufzeit- Anzahl Rüstvorgänge oder gesamte Rüstzeit, falls relevant 
+- Prioritätsregel- Cmax- Laufzeit- Anzahl Rüstvorgänge oder gesamte Rüstzeit, falls relevant
 
-Tabelle 2: Vergleich der Tabu-Search-Nachbarschaften 
+In Abbildung~\ref{fig:rule_comparison} werden die verschiedenen implementierten Prioritätsregeln (wie SPT, LPT, MINSTART, MINEND sowie kombinierte Heuristiken) über ausgewählte Instanzen hinweg verglichen.
 
-- Nachbarschaft- bester Cmax - durchschnittlicher Cmax- schlechtester Cmax - Standardabweichung- durchschnittliche Laufzeit- Anzahl Iterationen 
+\begin{figure}[htbp]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/rule_comparison}
+    \caption{Vergleich der prioritätsbasierten Eröffnungsheuristiken anhand des erreichten Makespans $C_{\max}$ für ausgewählte Classroom-Instanzen.}
+    \label{fig:rule_comparison}
+\end{figure}
 
-Tabelle 3: Vergleich mit OR-Tools 
+Tabelle 2: Vergleich der Tabu-Search-Nachbarschaften
 
-- Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search 
+- Nachbarschaft- bester Cmax - durchschnittlicher Cmax- schlechtester Cmax - Standardabweichung- durchschnittliche Laufzeit- Anzahl Iterationen
+
+Tabelle 3: Vergleich mit OR-Tools
+
+- Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search
 

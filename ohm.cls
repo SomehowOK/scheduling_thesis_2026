@@ -36,12 +36,12 @@
 \ProcessOptions\relax
 % Validate that a document type is set
 \ifma\else\ifba\else\ifrep\else
-	\ClassError{ohm}{Document type not set}{Set either master, bachelor, or report document type option}
-\fi\fi\fi
+			\ClassError{ohm}{Document type not set}{Set either master, bachelor, or report document type option}
+		\fi\fi\fi
 %----------------------------------------------------------------------
 % Class Loading
 %----------------------------------------------------------------------
-\LoadClass{report}
+\LoadClass[11pt]{report}
 %----------------------------------------------------------------------
 % Define the primary color for the document
 %----------------------------------------------------------------------
@@ -66,6 +66,7 @@
 \RequirePackage{environ}
 \RequirePackage{blindtext}
 \RequirePackage{svg}
+\svgsetup{inkscapeexe={C:/PROGRA\string~1/Inkscape/bin/inkscape.exe}}
 \RequirePackage{caption}
 \RequirePackage{amssymb}
 %----------------------------------------------------------------------
@@ -171,9 +172,14 @@
 \pagestyle{fancy}
 \renewcommand{\headrulewidth}{0pt}
 \captionsetup[table]{position=bottom}
-\captionsetup{width=0.95\textwidth} 
+\captionsetup{width=0.95\textwidth}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{2}
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+%----------------------------------------------------------------------
+%Zeilenabstand
+\onehalfspacing
 %----------------------------------------------------------------------
 % Code listings
 %----------------------------------------------------------------------
@@ -190,8 +196,8 @@
 	% Set standard names
 	\ifma \newcommand{\type}{Masterarbeit}
 	\else \ifba \newcommand{\type}{Bachelorarbeit}
-	\else \ifrep \newcommand{\type}{Bericht}
-	\fi\fi\fi
+		\else \ifrep \newcommand{\type}{Bericht}
+			\fi\fi\fi
 	% Override list and reference names
 	\renewcommand{\contentsname}{Inhaltsverzeichnis}
 	\renewcommand{\listtablename}{Tabellenverzeichnis}
@@ -205,8 +211,8 @@
 		% Set standard names
 		\ifma \newcommand{\type}{Master Thesis}
 		\else \ifba \newcommand{\type}{Bachelor Thesis}
-		\else \ifrep \newcommand{\type}{Report}
-		\fi\fi\fi
+			\else \ifrep \newcommand{\type}{Report}
+				\fi\fi\fi
 		% Override list and reference names
 		\renewcommand{\contentsname}{Table of Contents}
 		\renewcommand{\listtablename}{List of Tables}
@@ -327,27 +333,27 @@
 			\vspace*{8ex}
 			\large
 			\begin{center}
-			\begin{tabular}{l p{0.4\textwidth}}
-				\ifhasExaminers
-					\ifde Pr\"{u}fer: \else \ifhasMultipleExaminers Examiners: \else Examiner: \fi \fi & \theexaminers\\[1.2ex]
-				\fi
-				\ifhasSupervisors
-					\ifde Betreuer: \else \ifhasMultipleSupervisors Supervisors: \else Supervisor: \fi \fi & \thesupervisors$^*$\\[0.4ex]
-				\fi
-			\end{tabular}
+				\begin{tabular}{l p{0.4\textwidth}}
+					\ifhasExaminers
+						\ifde Pr\"{u}fer: \else \ifhasMultipleExaminers Examiners: \else Examiner: \fi \fi & \theexaminers\\[1.2ex]
+					\fi
+					\ifhasSupervisors
+						\ifde Betreuer: \else \ifhasMultipleSupervisors Supervisors: \else Supervisor: \fi \fi & \thesupervisors$^*$\\[0.4ex]
+					\fi
+				\end{tabular}
 			\end{center}
 			\vspace*{\fill}
 			\footnotesize
 			\singlespacing
 			\begin{center}
-				\copyright\;\;\ifhasCompany \thecompany \else \theauthormetadata \fi,\;\the\year
+				\ifhasCompany \thecompany \else \theauthormetadata \fi,\;\the\year
 			\end{center}
 			\justifying
 			\singlespacing
 			\ifen
 				\noindent This work, including its parts, \textbf{is protected by copyright}. Any use outside the narrow limits of copyright law without the consent of \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors the authors \else the author \fi \fi is prohibited and punishable by law. This applies in particular to reproductions, translations, microfilming and storage and processing in electronic systems.
 			\else
-				\noindent Diese Arbeit, einschließlich ihrer Teile, \textbf{ist urheberrechtlich geschützt}. Jede Verwertung außerhalb der engen Grenzen des Urheberrechtsgesetzes ohne Zustimmung von \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors den Urhebern \else dem Urheber \fi \fi ist untersagt und strafbar. Dies gilt insbesondere für Vervielfältigungen, Übersetzungen, Mikroverfilmung und die Speicherung und Verarbeitung in elektronischen Systemen.
+				%\noindent Diese Arbeit, einschließlich ihrer Teile, \textbf{ist urheberrechtlich geschützt}. Jede Verwertung außerhalb der engen Grenzen des Urheberrechtsgesetzes ohne Zustimmung von \ifhasCompany \thecompany~ \else \ifhasMultipleAuthors den Urhebern \else dem Urheber \fi \fi ist untersagt und strafbar. Dies gilt insbesondere für Vervielfältigungen, Übersetzungen, Mikroverfilmung und die Speicherung und Verarbeitung in elektronischen Systemen.
 			\fi
 			\singlespacing
 			\ifhasCompany
@@ -373,14 +379,14 @@
 			\vspace*{16ex}
 			\large
 			\begin{center}
-			\begin{tabular}{l p{0.4\textwidth}}
-				\ifhasExaminers
-					\ifde Pr\"{u}fer: \else \ifhasMultipleExaminers Examiners: \else Examiner: \fi \fi & \theexaminers\\[1.2ex]
-				\fi
-				\ifhasSupervisors
-					\ifde Betreuer: \else \ifhasMultipleSupervisors Supervisors: \else Supervisor: \fi \fi & \thesupervisors$^*$\\[0.4ex]
-				\fi
-			\end{tabular}
+				\begin{tabular}{l p{0.4\textwidth}}
+					\ifhasExaminers
+						\ifde Pr\"{u}fer: \else \ifhasMultipleExaminers Examiners: \else Examiner: \fi \fi & \theexaminers\\[1.2ex]
+					\fi
+					\ifhasSupervisors
+						\ifde Betreuer: \else \ifhasMultipleSupervisors Supervisors: \else Supervisor: \fi \fi & \thesupervisors$^*$\\[0.4ex]
+					\fi
+				\end{tabular}
 			\end{center}
 			\vspace*{\fill}
 			\footnotesize
@@ -414,23 +420,23 @@
 % Abstract, Keywords, and Kurzdarstellung
 %----------------------------------------------------------------------
 \newcommand{\makeabstract}{
-%	\chapter*{\ifde Kurzdarstellung\else Abstract\fi}
-%	\label{ch:abstract}
-%	\ifen
-%		\theabstract
-%	\else
-%		\thekurzdarstellung
-%	\fi
-%	\section*{\ifde Schlagwörter\else Keywords\fi}
-%	\label{sec:keywords}
-%	\thekeywords
-%	\pagebreak
-%	\ifen
-%		\thispagestyle{empty}
-%		\section*{\ifde Kurzdarstellung\else Kurzdarstellung\fi}
-%		\label{sec:kurzdarstellung}
-%		\thekurzdarstellung
-%	\fi
+	%	\chapter*{\ifde Kurzdarstellung\else Abstract\fi}
+	%	\label{ch:abstract}
+	%	\ifen
+	%		\theabstract
+	%	\else
+	%		\thekurzdarstellung
+	%	\fi
+	%	\section*{\ifde Schlagwörter\else Keywords\fi}
+	%	\label{sec:keywords}
+	%	\thekeywords
+	%	\pagebreak
+	%	\ifen
+	%		\thispagestyle{empty}
+	%		\section*{\ifde Kurzdarstellung\else Kurzdarstellung\fi}
+	%		\label{sec:kurzdarstellung}
+	%		\thekurzdarstellung
+	%	\fi
 }
 %----------------------------------------------------------------------
 % Acknowledgements

@@ -5,61 +5,139 @@
 
 
 %----------------------------------------------------------------------
-\section{Eröffnungsheuristik - Giffler-Thompson-Algorithmus}
-\label{sec:section}
+\section{Eröffnungsheuristik - GT-Algorithmus}
+\label{sec:giffler-thompson}
 %----------------------------------------------------------------------
 
+\begin{algorithm}[H]
+    \caption{Giffler-Thompson-Algorithmus}
+    \label{alg:giffler_thompson}
+
+    \begin{algorithmic}[1]
+
+        \State $U \gets O$
+        \State $L_m \gets 0 \quad \forall m \in M$
+        \State $\lambda(m) \gets \emptyset \quad \forall m \in M$
+        \State $r(o_{j,1}) \gets 0 \quad \forall j \in J$
+        \State $r(o_{j,k}) \gets \infty \quad \forall j \in J, \; k > 1$
+
+        \While{$U \neq \emptyset$}
+
+        \State Berechne für alle $o_{j,k} \in U$ mit $r(o_{j,k}) < \infty$ den frühesten Startzeitpunkt:
+        \Statex \hspace{\algorithmicindent} $r_m(o_{j,k}) \gets \max\{ L_{m_{j,k}} + s_{\lambda(m_{j,k}),\, j},\; r(o_{j,k}) \}$
+
+        \State $C^* \gets \min \bigl\{ r_m(o_{j,k}) + p_{j,k} \bigm| o_{j,k} \in U \text{ und } r(o_{j,k}) < \infty \bigr\}$
+
+        \State Sei $m^*$ die Maschine, auf der $C^*$ erreicht wird
+
+        \State Bilde Konfliktmenge $K \gets \{ o_{j,k} \in U \mid m_{j,k} = m^*, \; r(o_{j,k}) < \infty, \; r_m(o_{j,k}) < C^* \}$
+
+        \State Wähle Operation $o' = o_{j',k'} \in K$ gemäß der Prioritätsregel $\pi$
+
+        \State $t(o') \gets r_m(o')$
+
+        \State $C(o') \gets t(o') + p_{j',k'}$
+
+        \State $L_{m^*} \gets C(o')$
+
+        \State $\lambda(m^*) \gets j'$
+
+        \If{$k' < q_{j'}$}
+        \State $r(o_{j',\, k'+1}) \gets C(o')$
+        \EndIf
+
+        \State $U \gets U \setminus \{o'\}$
+
+        \EndWhile
+
+    \end{algorithmic}
+\end{algorithm}
+
+Der Giffler-Thompson-Algorithmus \cite{giffler_algorithms_1960} wird als Eröffnungsheuristik zur Generierung einer zulässigen Startlösung für das Job Shop Scheduling Problem verwendet.
+
+Der Algorithmus beginnt mit der Initialisierung der Menge $U$ aller unverplanten Operationen, die zu Beginn der Gesamtmenge $O$ entspricht.
+Die Maschinenlasten $L_m$ sowie die Historie der zuletzt auf einer Maschine eingeplanten Jobs $\lambda(m)$ werden für alle Maschinen $m \in M$ auf Null bzw. die leere Menge $\emptyset$ gesetzt.
+Die Bereitschaftszeit $r(o_{j,k})$ wird für die jeweils ersten Operationen aller Jobs auf Null und für alle nachfolgenden Operationen auf unendlich initialisiert, um zu signalisieren, dass diese noch nicht einplanbar sind.
+
+In jeder Iteration der Hauptschleife wird für alle einplanbaren Operationen in $U$ der frühestmögliche Maschinen-Startzeitpunkt $r_m(o_{j,k})$ berechnet.
+Dieser ergibt sich als Maximum aus der aktuellen Last der benötigten Maschine zuzüglich einer eventuell anfallenden Rüstzeit $s_{\lambda(m_{j,k}),\, j}$ und der Bereitschaftszeit $r(o_{j,k})$ der Operation selbst.
+Darauf aufbauend wird der minimale Endzeitpunkt $C^*$ über alle einplanbaren Operationen bestimmt.
+Die Maschine, auf der dieser Wert erreicht wird, wird als kritische Maschine $m^*$ definiert.
+
+Anschließend wird die Konfliktmenge $K$ gebildet. Diese enthält alle noch nicht verplanten Operationen auf der kritischen Maschine $m^*$, deren frühestmöglicher Startzeitpunkt echt kleiner als $C^*$ ist.
+Aus dieser Menge wird mithilfe einer Prioritätsregel $\pi$ eine Operation $o' = o_{j',k'}$ zur festen Einplanung ausgewählt.
+
+Das Einplanen erfolgt durch das Setzen der Startzeit $t(o')$ auf ihren frühestmöglichen Maschinen-Startzeitpunkt $r_m(o')$ und der Berechnung des Fertigstellungszeitpunkts $C(o')$.
+Daraufhin werden die Last $L_{m^*}$ der kritischen Maschine auf $C(o')$ aktualisiert und der Job-Index $j'$ als der zuletzt auf $m^*$ verarbeitete Job gespeichert.
+Falls eine Nachfolgeoperation $o_{j',\, k'+1}$ im selben Job existiert, wird deren Bereitschaftszeit $r(o_{j',\, k'+1})$ auf die Endzeit $C(o')$ angehoben, womit sie in der nächsten Iteration einplanbar wird.
+Abschließend wird die geplante Operation $o'$ aus der Menge $U$ entfernt.
+Der Algorithmus terminiert, sobald alle Operationen eingeplant wurden und somit $U = \emptyset$ gilt.
+
+Da in jeder Iteration des Algorithmus Konflikte zwischen einplanbaren Operationen auf derselben Maschine auftreten können, werden Prioritätsregeln eingesetzt, um diese Konflikte aufzulösen.
+Die Wahl der Prioritätsregel hat dabei einen maßgeblichen Einfluss auf die Qualität des resultierenden Ablaufplans (den Makespan $C_{\max}$).
+
+Zu Beginn wurden acht verschiedene Prioritätsregeln für das Problem untersucht.
+Zunächst einfache Regeln, die sich auf eine einzelne Eigenschaft einer Operation beziehen.
+\begin{enumerate}
+    \item \textbf{Shortest Processing Time (SPT)}, dass die Operationen nach aufsteigender Prozessdauer sortiert
+    \item \textbf{Shortest Processing Time + Setup (SPTS)}, dass zusätzlich zur Prozessdauer die Rüstzeit betrachtet
+    \item \textbf{Longest Processing Time (LPT)}, dass Operationen nach absteigender Prozessdauer sortiert
+    \item \textbf{First Job (FJ)}, dass die Operationen nach ihrem Index sortiert
+\end{enumerate}
+
+Hier weitere Prio Regeln einfügen und erklären
+%\textit{Minimum Start Time} (MINSTART), dass die Operationen mit dem frühestmöglichen Startzeitpunkt zuerst geplant werden, und \textit{Minimum End Time} (MINEND), bei dem die Operationen mit dem frühestmöglichen Endzeitpunkt zuerst geplant werden, als auch komplexere kombinierte Heuristiken, welche die Einsatzmöglichkeiten von flexiblen Maschinen (Flexible Job Shop Scheduling) ausnutzen.
 
 %----------------------------------------------------------------------
 \section{Metaheuristik - Tabu-Suche}
-\label{sec:section}
+\label{sec:tabu-suche}
 %----------------------------------------------------------------------
 
 
 \begin{algorithm}[H]
-\caption{Tabu Search für das Job-Shop-Scheduling-Problem mit sequenzabhängigen Rüstzeiten}
-\label{alg:tabu_search}
+    \caption{Tabu Search für das Job-Shop-Scheduling-Problem mit sequenzabhängigen Rüstzeiten}
+    \label{alg:tabu_search}
 
-\begin{algorithmic}[1]
+    \begin{algorithmic}[1]
 
-\State $S \gets \hat{S}$
-\State $S^\ast \gets S$
-\State $TL \gets \emptyset$
-\State $I_{\text{total}} \gets 0$
-\State $I \gets 0$
-\State $\tau \gets 0$
+        \State $S \gets \hat{S}$
+        \State $S^\ast \gets S$
+        \State $TL \gets \emptyset$
+        \State $I_{\text{total}} \gets 0$
+        \State $I \gets 0$
+        \State $\tau \gets 0$
 
-\While{$I_{\text{total}} < I_{\text{total}}^{\max}$ \textbf{and} $I < I^{\max}$ \textbf{and} $\tau < \tau^{\max}$}
-    \State $I_{\text{total}} \gets I_{\text{total}} + 1$
-    \State Erzeuge die Nachbarschaft $NB(S)$ der aktuellen Lösung
+        \While{$I_{\text{total}} < I_{\text{total}}^{\max}$ \textbf{and} $I < I^{\max}$ \textbf{and} $\tau < \tau^{\max}$}
+        \State $I_{\text{total}} \gets I_{\text{total}} + 1$
+        \State Erzeuge die Nachbarschaft $NB(S)$ der aktuellen Lösung
 
-    \If{$I \geq I^{\text{div}}$}
+        \If{$I \geq I^{\text{div}}$}
         \State Ergänze zufällige nicht-kritische Bewegungen zu $NB(S)$
-    \EndIf
-
-    \For{$S' \in NB(S)$} (jede Nachbarlösung)
-        \If{$S'$ ist unzulässig \textbf{ or } (tabuiert \textbf{ and } Aspiration nicht erfüllt)}
-            \State Entferne $S'$ aus $NB(S)$
         \EndIf
-    \EndFor
 
-    \State Wähle die beste zulässige Nachbarlösung $S' \in NB(S)$
+        \For{$S' \in NB(S)$} (jede Nachbarlösung)
+        \If{$S'$ ist unzulässig \textbf{ or } (tabuiert \textbf{ and } Aspiration nicht erfüllt)}
+        \State Entferne $S'$ aus $NB(S)$
+        \EndIf
+        \EndFor
 
-    \State $S \gets S'$
-    \State Entferne abgelaufene Einträge aus $TL$
-    \State $TL \gets TL \cup \{\text{inverse Bewegung von } S'\}$
+        \State Wähle die beste zulässige Nachbarlösung $S' \in NB(S)$
 
-    \If{$F(S) < F(S^\ast)$}
+        \State $S \gets S'$
+        \State Entferne abgelaufene Einträge aus $TL$
+        \State $TL \gets TL \cup \{\text{inverse Bewegung von } S'\}$
+
+        \If{$F(S) < F(S^\ast)$}
         \State $S^\ast \gets S$
         \State $I \gets 0$
-    \Else
+        \Else
         \State $I \gets I + 1$
-    \EndIf
-\EndWhile
+        \EndIf
+        \EndWhile
 
-\State \Return $S^\ast$
+        \State \Return $S^\ast$
 
-\end{algorithmic}
+    \end{algorithmic}
 \end{algorithm}
 
 
@@ -101,9 +179,9 @@ Nach Abschluss der Suche wird $S^\ast$ zurückgegeben.
 
 %----------------------------------------------------------------------
 \subsection{Kritischer Pfad und kritische Blöcke}
-\label{sec:section}
+\label{sec:kritischer-pfad}
 %----------------------------------------------------------------------
-Die Bewertung einer Lösung erfolgt auf Basis eines disjunktiven Graphen. Eine solche Modellierung als kann auf die Arbeiten von Balas (1969) \cite{balas_machine_1969} zurückgeführt werden.
+Die Bewertung einer Lösung erfolgt auf Basis eines disjunktiven Graphen. Eine solche Modellierung kann auf die Arbeiten von Balas (1969) \cite{balas_machine_1969} zurückgeführt werden.
 Jede Operation wird durch einen Knoten repräsentiert.
 Zwischen den Knoten existieren konjunktive Kanten für die technologische Reihenfolge innerhalb eines Jobs sowie disjunktive Kanten für die Bearbeitungsreihenfolge auf einer Maschine.
 Die konjunktiven Kanten sind durch die Jobs der Instanz vorgegeben.
@@ -119,7 +197,7 @@ Anschließend werden alle Operationen ohne Vorgänger mit Startzeit null in eine
 Bei der Verarbeitung einer Operation $u$ werden ihre Nachfolger entlang beider Kantentypen relaxiert.
 Für jeden Nachfolger $v$ gilt
 \[
-start(v) = \max\left(start(v), completion(u) + s_{uv}\right),
+    start(v) = \max\left(start(v), completion(u) + s_{uv}\right),
 \]
 wobei $s_{uv}$ die zusätzliche Rüstzeit auf der betrachteten Maschinenkante bezeichnet und auf konjunktiven Kanten null ist.
 Die Maximumbildung stellt sicher, dass eine Operation erst startet, wenn alle unmittelbaren Vorgänger abgeschlossen sind.
@@ -135,7 +213,7 @@ Die Summe seiner Kantengewichte entspricht exakt dem Makespan.
 
 Auf dieser Grundlage werden kritische Blöcke bestimmt.
 Ein kritischer Block ist eine maximale Teilfolge des kritischen Pfades, deren Operationen auf derselben Maschine liegen und dort unmittelbar aufeinanderfolgen.
-Diese Blöcke definieren den Suchraum der kritischkeitsbasierten Nachbarschaften \cite{nowicki_fast_1996}. 
+Diese Blöcke definieren den Suchraum der kritischkeitsbasierten Nachbarschaften \cite{nowicki_fast_1996}.
 
 Die aktuelle Implementierung liefert bei mehreren gleich langen kritischen Pfaden nur einen einzelnen Pfad zurück.
 Dies folgt erstens aus der Wahl des Endknotens, da bei mehreren Operationen mit identischer maximaler Fertigstellungszeit nur der erste gefundene Endpunkt verwendet wird.
@@ -151,7 +229,7 @@ Eine vollständige Behandlung würde die gleichzeitige Identifikation aller Endo
 
 %----------------------------------------------------------------------
 \subsection{Nachbarschaftsdefinitionen}
-\label{sec:section}
+\label{sec:nachbarschaftsdefinitionen}
 %----------------------------------------------------------------------
 Für die Tabu-Suche werden drei Nachbarschaftsdefinitionen verwendet, die auf dem kritischen Pfad basieren.
 Der kritische Pfad ist die Folge von Operationen, die den Makespan $C_{\max}$ bestimmt.
@@ -181,7 +259,7 @@ Diese Variante betrachtet alle lokalen Adjazenzvertauschungen innerhalb kritisch
 Pro kritischem Block werden nur die ersten beiden sowie die letzten beiden Operationen vertauscht.
 Ein Block $[A, B, C, D, E]$ erzeugt damit ausschließlich die Züge $(A,B)$ und $(D,E)$.
 Die Reduktion basiert auf dem Ergebnis, dass Randvertauschungen makespanwirksam sein können, während innere Vertauschungen diese Eigenschaft nicht besitzen.
-\cite{nowicki_1996}
+\cite{nowicki_fast_1996}
 
 \textbf{N6-Nachbarschaft}.
 N6 erweitert N5 um Insert-Bewegungen.
@@ -192,12 +270,15 @@ Diese Erweiterung vergrößert die strukturelle Diversität der Nachbarschaft be
 \cite{Balas&Vazacopoulos}
 
 %----------------------------------------------------------------------
-\section{Hardwarespezifikationen}
-\label{sec:section}
+\section{Hard- und Softwarespezifikationen}
+\label{sec:hardware}
 %----------------------------------------------------------------------
-Die Instanzen wurden auf einem Apple MacBook Pro aus dem Jahr 2023 ausgeführt. Das System ist mit einem Apple M3 Pro Prozessor sowie 18 GB gemeinsam genutztem Arbeitsspeicher ausgestattet. Die Berechnungen wurden lokal auf dem Gerät durchgeführt, ohne zusätzliche externe Rechenressourcen oder Serverinfrastruktur zu verwenden.  
+Die Instanzen wurden auf einem Apple MacBook Pro aus dem Jahr 2023 ausgeführt.
+Das System ist mit einem Apple M3 Pro Prozessor sowie 18 GB gemeinsam genutztem Arbeitsspeicher ausgestattet.
+Die Berechnungen wurden lokal auf dem Gerät durchgeführt, ohne zusätzliche externe Rechenressourcen oder Serverinfrastruktur zu verwenden.
 
-
-
-
-
+Die algorithmische Umsetzung erfolgte in der Programmiersprache Python in der Version 3.9.7.
+Als Betriebssystem kam macOS Tahoe 26.5.2 zum Einsatz.
+Für die exakte Validierung wurde der CP-Solver aus den Google OR-Tools in der Version 9.15.6755 verwendet.
+Für mathematische Operationen und Datenstrukturen wurde zudem die Bibliothek NumPy eingebunden.
+Die Erstellung der Gantt-Charts zur Visualisierung der Ablaufpläne erfolgte mithilfe von Google Charts.
