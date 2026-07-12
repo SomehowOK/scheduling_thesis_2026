@@ -12,7 +12,8 @@ Gegeben ist eine Menge von Jobs \(J\) und eine Menge von Maschinen \(M\). Jeder 
 \]
 Die Reihenfolge der Operationen innerhalb eines Jobs ist vorgegeben. Eine Operation \(o_{j,k}\) darf daher erst beginnen, wenn ihre direkte Vorgängeroperation \(o_{j,k-1}\) abgeschlossen ist.
 
-Jede Operation \(o_{j,k}\) wird auf genau einer Maschine \(m_{j,k} \in M\) bearbeitet und besitzt eine Bearbeitungszeit \(p_{j,k}\). Zwischen zwei Operationen, die auf derselben Maschine direkt aufeinanderfolgen, kann eine sequenzabhängige Rüstzeit \(s_{u,v}\) anfallen. Diese hängt von der vorherigen Operation \(u\) und der nachfolgenden Operation \(v\) ab.
+Jede Operation \(o_{j,k}\) wird auf genau einer Maschine \(m_{j,k} \in M\) bearbeitet und besitzt eine Bearbeitungszeit \(p_{j,k}\). Zwischen zwei Operationen, die auf derselben Maschine direkt aufeinanderfolgen, kann eine sequenzabhängige Rüstzeit \(s_{u,v}\) anfallen. Diese hängt von der vorherigen Operation \(u\) und der nachfolgenden Operation \(v\) ab. Ziel des Algorithmus ist es, eine Reihenfolge der Operationen auf den Maschinen zu finden, die den Makespan \(C_{\max}\) minimiert. Der Makespan ist definiert als der Zeitpunkt, zu dem die letzte Operation aller Jobs abgeschlossen ist.
+
 
 \section*{Notation der Eröffnungsheuristik}
 
