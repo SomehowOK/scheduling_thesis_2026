@@ -7,21 +7,9 @@
 \section{Problemstellung}
 \label{sec:problemstellung}
 %----------------------------------------------------------------------
-In dieser Arbeit wird eine Metaheuristik für das Job-Shop-Scheduling-Problem mit sequenzabhängigen Rüstzeiten entwickelt und evaluiert.
-Dieses Problem gehört zur Klasse der NP-schweren Optimierungsprobleme.
-Die Problemstellung befasst sich mit der zeitlichen Einplanung einer Menge von Jobs auf einer festgelegten Menge von Maschinen.
-Jeder Job besteht aus einer strikten Abfolge von einzelnen Operationen.
-Die technologische Reihenfolge dieser Operationen ist durch die Problemstellung fest vorgegeben.
-Eine Maschine kann zu jedem Zeitpunkt höchstens eine Operation gleichzeitig bearbeiten.
-
-Eine wesentliche praxisrelevante Erweiterung stellen die sequenzabhängigen Rüstzeiten dar.
-Diese Rüstzeiten fallen an, wenn zwei Operationen unterschiedlicher Jobs direkt nacheinander auf derselben Maschine verarbeitet werden.
-Die Dauer des Rüstvorgangs hängt dabei explizit von der Reihenfolge der beiden Jobs ab.
-Das primäre Ziel der Problemstellung ist die Ermittlung eines zulässigen Ablaufplans.
-Hierbei müssen die optimalen Startzeiten für alle Operationen bestimmt werden.
-Die Zielfunktion verlangt die Minimierung der Gesamtproduktionsdauer, auch als Makespan \(C_{\max}\) bezeichnet.
-Durch die zusätzlichen Rüstzeiten vergrößert sich der kombinatorische Suchraum erheblich.
-Exakte Lösungsverfahren stoßen daher bei größeren Probleminstanzen schnell an ihre Grenzen.
+Die Planung von Produktionsabläufen ist eine zentrale Aufgabe in der Fertigungssteuerung. Unternehmen müssen verfügbare Maschinen, Arbeitsplätze und Zeiträume so einsetzen, dass Aufträge effizient bearbeitet werden können. Dabei entstehen Abhängigkeiten zwischen einzelnen Arbeitsschritten. Operationen eines Auftrags müssen in einer festgelegten Reihenfolge ausgeführt werden. Gleichzeitig konkurrieren verschiedene Aufträge um dieselben Maschinen.
+Solche Planungsprobleme treten unter anderem in der industriellen Fertigung, der Montage, der Instandhaltung und der Auftragsproduktion auf. Die Qualität eines Produktionsplans beeinflusst die Durchlaufzeiten, die Maschinenauslastung und die Einhaltung von Lieferterminen. Bereits kleine Änderungen der Auftragsreihenfolge können den gesamten Produktionsablauf verändern.
+Eine zusätzliche Herausforderung entsteht durch Rüstvorgänge. Maschinen müssen häufig angepasst, gereinigt oder mit anderen Werkzeugen ausgestattet werden, bevor die nächste Operation ausgeführt werden kann. Die Dauer dieser Umrüstung hängt dabei von der Reihenfolge der bearbeiteten Aufträge ab. Eine ungeeignete Reihenfolge führt zu längeren Rüstzeiten und verlängert die gesamte Produktionsdauer.
 %----------------------------------------------------------------------
 \section{Zielsetzung}
 \label{sec:zielsetzung}
