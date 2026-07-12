@@ -25,7 +25,7 @@ In Abbildung~\ref{fig:rule_comparison} werden die Ergebnisse aller acht implemen
 \begin{figure}[H]
     \centering
     \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/rule_comparison}
-    \caption{Vergleich der prioritätsbasierten Eröffnungsheuristiken anhand des erreichten Makespans $C_{\max}$ für ausgewählte Classroom-Instanzen.}
+    \caption{Vergleich der prioritätsbasierten Eröffnungsheuristiken anhand des erreichten Makespans $C_{\max}$ für ausgewählte Classroom Instanzen.}
     \label{fig:rule_comparison}
 \end{figure}
 
@@ -171,7 +171,7 @@ Um eine noch umfassendere Bewertung der Ergebnisse zu ermöglichen, werden die N
 
 \begin{table}[H]
     \centering
-    \caption{Vergleich der Nachbarschaftsdefinitionen über alle 30 Classroom-Instanzen mit einem Zeitlimit von 90\,s.}
+    \caption{Vergleich der Nachbarschaftsdefinitionen über alle 30 Classroom Instanzen mit einem Zeitlimit von 90\,s.}
     \label{tab:neighborhood_comparison_all}
     \resizebox{\textwidth}{!}{%
         \begin{tabular}{lccccccc}
@@ -242,9 +242,31 @@ Auch bei der Instanz 10\_2 bleibt die Heuristik führend.
 Lediglich bei der Instanz 10\_3 bleibt der CP-Solver mit 3161 führend, wobei der Abstand von \emph{N6} mit +43 Punkten moderat ausfällt.
 Die Nachbarschaften \emph{N5} und \emph{N6} liegen in den meisten Fällen hinter \emph{Adjacent-Swap} zurück.
 
-Um diesen Vergleich quantitativ über alle Instanzen abzurunden, werden die Ergebnisse in Tabelle~\ref{tab:XXX} zusammengefasst.
+Um diesen Vergleich quantitativ über alle Instanzen abzurunden, werden die aggregierten Ergebnisse aller drei Nachbarschaften im Vergleich zum CP-Solver in Tabelle~\ref{tab:solver_comparison_all} zusammengefasst.
+$\Delta$ gibt dabei die mittlere Abweichung der jeweiligen Nachbarschaftsde vom CP-Solver an.
 
+\begin{table}[H]
+    \centering
+    \caption{Vergleich der Tabu-Suche-Nachbarschaften mit dem CP-Solver \"uber alle 30 Classroom Instanzen (Zeitlimit: 90\,s).}
+    \label{tab:solver_comparison_all}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{lrrrrrr}
+            \hline
+            \textbf{Methode}     & \textbf{$\varnothing\,C_{\max}$} & \textbf{$\varnothing$ Iter.} & \textbf{$\varnothing$ Zeit} & \textbf{$\varnothing\,\Delta$ abs.} & \textbf{$\varnothing\,\Delta$ rel.} \\
+            \hline
+            Adjacent-Swap        & 1459.7                           & 1957                         & 23.5\,s                     & +47.0                               & +2.95\,\%                           \\
+            N5                   & 1475.8                           & 2175                         & 17.5\,s                     & +63.1                               & +4.29\,\%                           \\
+            N6                   & 1470.5                           & 2530                         & 36.8\,s                     & +57.7                               & +3.41\,\%                           \\
+            CP-Solver (OR-Tools) & 1412.8                           & ---                          & 47.3\,s                     & ---                                 & ---                                 \\
+            \hline
+        \end{tabular}%
+    }
+\end{table}
 
-Tabelle 3: Vergleich mit OR-Tools
-
-- Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search
+Die \emph{Adjacent-Swap}-Nachbarschaft erzielt mit einem mittleren $C_{\max}$ von 1459,7 und einer Abweichung von $+2{,}95\,\%$ die besten heuristischen Ergebnisse.
+Sie benötigt im Mittel 23,5\,s und führt durchschnittlich 1957 Iterationen durch.
+\emph{N6} belegt mit $+3{,}41\,\%$ den zweiten Platz, verursacht jedoch mit 36,8\,s die höchste Rechenzeit, da die erweiterte Nachbarschaft pro Iteration aufwendiger zu evaluieren ist.
+\emph{N5} schneidet mit einer mittleren Abweichung von +4,29\,\% am schwächsten ab, konvergiert dafür mit 17,5\,s am schnellsten.
+Der CP-Solver erreicht einen mittleren Makespan von 1412,8.
+Für die kleineren Instanzsets (Sets~1--4) findet er in Sekundenbruchteilen optimale Lösungen, während er bei größeren Instanzen (Sets~6--10) innerhalb der 90-Sekunden-Schranke nur zulässige Lösungen liefert.
+Die Ergebnisse zeigen, dass die Tabu-Suche als Heuristik bei komplexen Instanzen unter identischer Zeitbeschränkung wettbewerbsfähig bleibt und in Einzelfällen den exakten Solver übertrifft.
