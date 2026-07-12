@@ -281,15 +281,15 @@ Eine vollständige Behandlung würde die gleichzeitige Identifikation aller Endo
 %----------------------------------------------------------------------
 Für die Tabu-Suche werden drei Nachbarschaftsdefinitionen verwendet, die auf dem kritischen Pfad basieren.
 Der kritische Pfad ist die Folge von Operationen, die den Makespan $C_{\max}$ bestimmt.
-Eine Verzögerung einer Operation auf diesem Pfad erhöht unmittelbar die Gesamtdauer.
-\cite{blazewicz_handbook_2019}
+Eine Verzögerung einer Operation auf diesem Pfad erhöht unmittelbar die Gesamtdauer \cite{blazewicz_handbook_2019}.
+
 
 Zur Erzeugung von Bewegungen wird der kritische Pfad in kritische Blöcke zerlegt.
 Ein kritischer Block ist eine maximale Teilfolge von Operationen, die auf dem kritischen Pfad liegen und auf derselben Maschine unmittelbar aufeinanderfolgen.
 Die Funktion \texttt{critical\_blocks()} durchläuft den kritischen Pfad und fasst Operationen so lange zu einem Block zusammen, wie Maschinenzuordnung und unmittelbare Nachbarschaft erhalten bleiben.
 Bei Maschinenwechsel oder fehlender Adjazenz wird ein neuer Block begonnen.
-Blöcke mit weniger als zwei Operationen werden verworfen, da kein sinnvoller Tausch definiert ist.
-\cite{nowicki_fast_1996}
+Blöcke mit weniger als zwei Operationen werden verworfen, da kein sinnvoller Tausch definiert ist \cite{nowicki_fast_1996}.
+
 
 Die Einschränkung auf Operationen innerhalb kritischer Blöcke folgt der Eigenschaft, dass Verbesserungen des Makespans nur durch Änderungen innerhalb kritischer Blöcke erreicht werden.
 Vertauschungen über Blockgrenzen hinweg reduzieren den Makespan nicht \cite{peter_j_m_van_laarhoven_job_1992}.
@@ -300,22 +300,21 @@ Die Implementierung umfasst drei Nachbarschaften.
 \textbf{Adjacent-Swap-Nachbarschaft}.
 Für jeden kritischen Block werden alle benachbarten Operationspaare vertauscht.
 Ein Block $[A, B, C, D]$ erzeugt die Züge $(A,B)$, $(B,C)$ und $(C,D)$.
-Diese Variante betrachtet alle lokalen Adjazenzvertauschungen innerhalb kritischer Blöcke.
-\cite{peter_j_m_van_laarhoven_job_1992}
+Diese Variante betrachtet alle lokalen Adjazenzvertauschungen innerhalb kritischer Blöcke \cite{peter_j_m_van_laarhoven_job_1992}
+.
 
 \textbf{N5-Nachbarschaft}.
 Pro kritischem Block werden nur die ersten beiden sowie die letzten beiden Operationen vertauscht.
 Ein Block $[A, B, C, D, E]$ erzeugt damit ausschließlich die Züge $(A,B)$ und $(D,E)$.
-Die Reduktion basiert auf dem Ergebnis, dass Randvertauschungen makespanwirksam sein können, während innere Vertauschungen diese Eigenschaft nicht besitzen.
-\cite{nowicki_fast_1996}
+Die Reduktion basiert auf dem Ergebnis, dass Randvertauschungen makespanwirksam sein können, während innere Vertauschungen diese Eigenschaft nicht besitzen \cite{nowicki_fast_1996}
+.
 
 \textbf{N6-Nachbarschaft}.
 N6 erweitert N5 um Insert-Bewegungen.
 Zusätzlich zu den N5-Randver-tauschungen kann jede innere Operation eines Blocks an den Blockanfang oder an das Blockende verschoben werden.
 Für den Block $[A, B, C, D, E]$ entstehen neben $(A,B)$ und $(D,E)$ beispielsweise die Sequenzen $[C, A, B, D, E]$ und $[A, C, D, E, B]$.
 Duplikate werden ausgeschlossen, wenn ein Insert-Zug äquivalent zu einem bereits enthaltenen N5-Zug ist.
-Diese Erweiterung vergrößert die strukturelle Diversität der Nachbarschaft bei weiterhin begrenzter Kandidatenzahl.
-\cite{Balas&Vazacopoulos}
+Diese Erweiterung vergrößert die strukturelle Diversität der Nachbarschaft bei weiterhin begrenzter Kandidatenzahl \cite{Balas&Vazacopoulos}.
 
 %----------------------------------------------------------------------
 \section{Hard- und Softwarespezifikationen}
@@ -325,8 +324,7 @@ Die Instanzen wurden auf einem Apple MacBook Pro aus dem Jahr 2023 ausgeführt.
 Das System ist mit einem Apple M3 Pro Prozessor sowie 18 GB gemeinsam genutztem Arbeitsspeicher ausgestattet.
 Die Berechnungen wurden lokal auf dem Gerät durchgeführt, ohne zusätzliche externe Rechenressourcen oder Serverinfrastruktur zu verwenden.
 
-Die algorithmische Umsetzung erfolgte in der Programmiersprache Python in der Version 3.9.7.
-Als Betriebssystem kam macOS Tahoe 26.5.2 zum Einsatz.
+Die algorithmische Umsetzung erfolgte in der Programmiersprache Python in der Version 3.13.11
+Als Betriebssystem kam macOS Tahoe 26.5.1 zum Einsatz.
 Für die exakte Validierung wurde der CP-Solver aus den Google OR-Tools in der Version 9.15.6755 verwendet.
-Für mathematische Operationen und Datenstrukturen wurde zudem die Bibliothek NumPy eingebunden.
 Die Erstellung der Gantt-Charts zur Visualisierung der Ablaufpläne erfolgte mithilfe von Google Charts.
