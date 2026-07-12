@@ -238,11 +238,10 @@ Wohingegen die Richtung der disjunktiven Kanten zunächst offen und erst durch d
 Diese Kanten tragen die Bearbeitungsdauer und die zusätzlichen sequenzabhängige Rüstzeiten.
 Sobald für jede Maschine eine zulässige Reihenfolge vorliegt, ist der resultierende Graph azyklisch.
 
-In dem azyklischen Graphen entspricht die früheste Startzeit einer Operation der Länge des längsten Pfades von einer Quelle zu diesem Knoten.
-Die Funktion \texttt{evaluate\_orders(problem, orders)} berechnet diese Startzeiten durch eine Longest-Path-Berechnung.
-Zunächst wird für jede Operation der Eingangsgrad bestimmt.
+In dem azyklischen Graphen entspricht die Differenz aus frühester Startzeit einer Operation und letztem Fertigstellungszeitpunkts der Länge des längsten Pfades. 
+Um diesen berechnen zu können wird zunächst für jede Operation der Eingangsgrad bestimmt.
 Eine Operation besitzt höchstens zwei unmittelbare Vorgänger: einen Job-Vorgänger und einen Maschinen-Vorgänger.
-Anschließend werden alle Operationen ohne Vorgänger mit Startzeit null in eine Warteschlange eingefügt.
+Daraufhin werden alle Operationen ohne Vorgänger mit Startzeit null in eine Warteschlange eingefügt.
 Bei der Verarbeitung einer Operation $u$ werden ihre Nachfolger entlang beider Kantentypen relaxiert.
 Für jeden Nachfolger $v$ gilt
 \[
@@ -292,9 +291,9 @@ Bei Maschinenwechsel oder fehlender Adjazenz wird ein neuer Block begonnen.
 Blöcke mit weniger als zwei Operationen werden verworfen, da kein sinnvoller Tausch definiert ist.
 \cite{nowicki_fast_1996}
 
-Die Einschränkung auf Operationen innerhalb kritischer Blöcke folgt der klassischen Eigenschaft, dass Verbesserungen des Makespans nur durch Änderungen innerhalb solcher Blöcke erreicht werden.
-Vertauschungen über Blockgrenzen hinweg reduzieren den Makespan nicht.
-\cite{peter_j_m_van_laarhoven_job_1992}
+Die Einschränkung auf Operationen innerhalb kritischer Blöcke folgt der Eigenschaft, dass Verbesserungen des Makespans nur durch Änderungen innerhalb kritischer Blöcke erreicht werden.
+Vertauschungen über Blockgrenzen hinweg reduzieren den Makespan nicht \cite{peter_j_m_van_laarhoven_job_1992}.
+
 
 Die Implementierung umfasst drei Nachbarschaften.
 
