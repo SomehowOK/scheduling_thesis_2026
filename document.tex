@@ -12,6 +12,10 @@
 ]{ohm}
 
 \usepackage{algorithm}
+\makeatletter
+\renewcommand{\ext@algorithm}{lol}
+\let\l@algorithm\l@figure
+\makeatother
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{float}
@@ -32,8 +36,8 @@
 % \company{Example AG} % Optional
 % \supervisor{Dr.\,rer.\,nat.\,Muster Betreuerin} % Optional, multiple supported
 %----------------------------------------------------------------------
-\keyword{Container Image}
-\keyword{Software Supply Chain Security}
+\keyword{Job Shop Scheduling Problem}
+\keyword{Metaheuristic}
 %----------------------------------------------------------------------
 \repository{https://git.informatik.fh-nuernberg.de/maxmu123/thesis} % Optional
 %----------------------------------------------------------------------
@@ -75,7 +79,7 @@
 \include{content/2_notation}
 \include{content/3_methodik}
 \include{content/4_ergebnisse}
-\include{content/5_diskussion}
+%\include{content/5_diskussion}
 %\include{content/6_summary}
 %----------------------------------------------------------------------
 % \backmatter
@@ -88,6 +92,6 @@
 %----------------------------------------------------------------------
 % \appendix
 %----------------------------------------------------------------------
-\appendix
-\include{content/a1_supplemental}
+%\appendix
+%\include{content/a1_supplemental}
 \end{document}

@@ -3,74 +3,24 @@
 \label{ch:ergebnisse}
 %----------------------------------------------------------------------
 
+In diesem Kapitel werden die Ergebnisse der entwickelten Heuristiken quantitativ ausgewertet und analysiert.
+Als Testdatenbasis dienen hierbei die ClassroomSet-Instanzen, welche sich aus zehn Sets mit jeweils drei Instanzen zusammensetzen.
+Die Evaluation gliedert sich in drei wesentliche Abschnitte.
+Zunächst wird die Leistung der verschiedenen Prioritätsregeln innerhalb des Giffler-Thompson-Algorithmus verglichen, um eine geeignete Startlösung zu bestimmen.
+Anschließend erfolgt die Auswertung der Tabu-Suche, bei der die drei Nachbarschaftsstrukturen Adjacent-Swap, N5 und N6 gegenübergestellt werden.
+Den Abschluss bildet die Validierung der Metaheuristik durch den Vergleich mit den Ergebnissen des exakten CP-Solvers der Google OR-Tools.
+
+
 \section{Eröffnungsheuristik Ergebnisse}
 \label{sec:ergebnisse_eroeffnungsheuristik}
 
-Zu Beginn wurden acht verschiedene Prioritätsregeln für das Problem untersucht.
-Zunächst vier einfache Regeln, wie sie unter anderem von Haupt (1988) \cite{haupt_heuristic_1988} beschrieben werden.
-Sie beziehen sich meist auf eine einzelne Eigenschaft einer Operation.
-
-\begin{enumerate}
-    \item \textbf{Shortest Processing Time (SPT)}: Sortiert die Operationen nach aufsteigender Prozessdauer.
-    \item \textbf{Shortest Processing Time + Setup (SPTS)}: Betrachtet zusätzlich zur Prozessdauer die Rüstzeit.
-    \item \textbf{Longest Processing Time (LPT)}: Sortiert Operationen nach absteigender Prozessdauer.
-    \item \textbf{First Come First Served (FCFS)}: Ordnet die Operationen der Reihenfolge nach.\\
-\end{enumerate}
-
-Anschließend wurden vier weitere Prioritätsregeln nach Artigues et al. (2005) \cite{artigues_schedule_2005} und Kress et al. (2019) \cite{kress_worker_2019} implementiert.
-
-\begin{enumerate}
-    \item \textbf{Minimum Start Time (MINSTART)}: Wählt die Operation $v = o_{j,k} \in K$ mit dem frühestmöglichen Startzeitpunkt $r_m(v)$ aus:
-          \begin{equation}
-              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( r_m(v) \right)
-          \end{equation}
-          Sie minimiert Leerzeiten der Maschinen zu Beginn des Ablaufplans.
-          Dies geschieht durch ein frühestmögliches Einplanen der Operationen.
-          Als Nachteil wird die Bearbeitungszeit der gewählten Operationen ignoriert.
-          Auch die Restarbeit des Jobs bleibt unberücksichtigt.
-          Dies kann lange Jobs am Ende des Ablaufplans verzögern.
-          Zudem werden Rüstzeiten nicht direkt minimiert.
-
-    \item \textbf{Minimum End Time (MINEND)}: Wählt die Operation $v = o_{j,k} \in K$ aus, welche den frühestmöglichen Fertigstellungszeitpunkt (Summe aus dem Startzeitpunkt $r_m(v)$ und der Bearbeitungszeit $p_{j,k}$) aufweist:
-          \begin{equation}
-              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( r_m(v) + p_{j,k} \right)
-          \end{equation}
-          Diese Regel ist stark verwandt mit den Regeln MINSTART und SPT. Sie zielt jedoch auf den frühestmöglichen Abschluss einzelner Operationen ab und berücksichtigt zusätzlich die Maschinenverfügbarkeit.
-          Dadurch werden belegte Maschinen schnell wieder freigegeben.
-          Die Nachfolgeoperationen können somit früher beginnen und sehr lange Operationen werden zu Beginn vermieden, falls sie kürzere Operationen blockieren würden.
-          Der Nachteil liegt im Fehlen einer globalen Sicht auf die Restarbeit der Jobs.
-          Es können erhebliche Engpässe gegen Ende des Ablaufplans entstehen, die den Makespan negativ beeinflussen.
-
-    \item \textbf{Setup - Most Work Remaining (Setup - MWKR)}: Bevorzugt Operationen mit einer großen verbleibenden Restarbeit des zugehörigen Jobs $\sum_{l=k}^{q_j} p_{j,l}$, während gleichzeitig hohe sequenzabhängige Rüstzeiten $s_{u,v}$ zum vorherigen Job auf der Maschine bestraft werden:
-          \begin{equation}
-              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( s_{u,v} - \sum_{l=k}^{q_j} p_{j,l} \right)
-          \end{equation}
-          wobei $u$ die auf der Maschine $m^*$ direkt zuvor verarbeitete Operation darstellt.
-
-          Die Regel bevorzugt Jobs mit großer Restarbeit.
-          Gleichzeitig wirken hohe Rüstzeiten entgegengesetzt und machen die Operation unattraktiver.
-          Dies vermeidet Bottlenecks gegen Ende des Ablaufs.
-          Zudem wird der gesamte Prozess und nicht nur die unmittelbar nächste Operation betrachtet.
-          Ein Nachteil ist, dass die Regel die Maschinenverfügbarkeit und Operationsdauer nicht mit betrachtet.
-
-    \item \textbf{Flow Due Date + Most Work Remaining + Shortest Setup (FDD + MWKR + SS)}: Diese kombinierte Heuristik minimiert das Verhältnis aus der bereits erbrachten Job-Arbeit $\sum_{l=1}^{k} p_{j,l}$ und der verbleibenden Restarbeit $\sum_{l=k}^{q_j} p_{j,l}$, addiert um die Rüstzeit $s_{u,v}$ zur direkt vorherigen Operation $u$ auf derselben Maschine $m^*$:
-          \begin{equation}
-              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( \frac{\sum_{l=1}^{k} p_{j,l}}{\sum_{l=k}^{q_j} p_{j,l}} + s_{u,v} \right)
-          \end{equation}
-          wobei $u$ die auf der kritischen Maschine $m^*$ direkt zuvor verarbeitete Operation darstellt.
-
-          Die kombinierte Regel \textbf{FDD+MWKR+SS} wägt den relativen Jobfortschritt und die Rüstzeit ab.
-          Dies sorgt für eine ausgeglichene Maschinenauslastung.
-          Jedoch dominiert bei geringen Rüstzeiten der relative Jobfortschritt und bei großen Rüstzeiten überwiegt diese das Fortschrittsverhältnis.
-\end{enumerate}
+Zur Generierung einer zulässigen Startlösung für das Job-Shop-Scheduling-Problem wurden alle acht in Abschnitt~\ref{sec:giffler-thompson} beschriebenen Prioritätsregeln auf die ClassroomSet-Instanzen angewendet.
+Die Wahl der jeweiligen Prioritätsregel steuert dabei die Konfliktauflösung auf den Maschinen und beeinflusst somit direkt den resultierenden Makespan.
+Die Auswertung dient dem systematischen Vergleich der Heuristiken hinsichtlich ihrer Lösungsqualität.
+Dabei sollen die am besten geeignete Regel zur Erzeugung der Startlösung $\hat{S}$ für die nachgelagerte Tabu-Suche identifiziert werden.
 
 
-%---------------------------------------------------------------------
-Tabelle 1: Ergebnisse der Giffler-Thompson-Prioritätsregeln
-
-- Prioritätsregel- Cmax- Laufzeit- Anzahl Rüstvorgänge oder gesamte Rüstzeit, falls relevant
-
-In Abbildung~\ref{fig:rule_comparison} werden die verschiedenen implementierten Prioritätsregeln (wie SPT, LPT, MINSTART, MINEND sowie kombinierte Heuristiken) über ausgewählte Instanzen hinweg verglichen.
+In Abbildung~\ref{fig:rule_comparison} werden die Ergebnisse aller acht implementierten Prioritätsregeln über ausgewählte Instanzen hinweg verglichen.
 
 \begin{figure}[H]
     \centering
@@ -79,11 +29,222 @@ In Abbildung~\ref{fig:rule_comparison} werden die verschiedenen implementierten 
     \label{fig:rule_comparison}
 \end{figure}
 
-Tabelle 2: Vergleich der Tabu-Search-Nachbarschaften
+Es wird schnell deutlich, dass die trivialen Prioritätsregeln (SPT, SPTS, LPT, FCFS) im Durchschnitt deutlich schlechtere Ergebnisse liefern als die vier komplexeren Regeln.
+In den dargestellten Ergebnissen konnte keine der einfacheren Regeln die beste Lösung generieren.
 
-- Nachbarschaft- bester Cmax - durchschnittlicher Cmax- schlechtester Cmax - Standardabweichung - durchschnittliche Laufzeit- Anzahl Iterationen
+Zur besseren Veranschaulichung der Unterschiede werden in der folgenden Tabelle noch einmal die Ergebnisse aller acht Prioritätsregeln über die gesamte ClassroomSet-Datenbasis hinweg gegenübergestellt.
+
+Die Bewertung erfolgt anhand von fünf Leistungskennzahlen.
+Der mittlere Makespan $C_{\max}$ gibt die durchschnittliche Gesamtlaufzeit über alle Instanzen an.
+Die mittlere relative prozentuale Abweichung (RPD) beschreibt die durchschnittliche Abweichung zur jeweils besten Heuristiklösung.
+Die maximale RPD zeigt die größte Abweichung bei einer einzelnen Instanz.
+Die Spalte Bestlösungen zählt, wie oft eine Regel die beste Startlösung ermittelt hat.
+Der mittlere Rang gibt die durchschnittliche Platzierung der Regel im direkten Vergleich aller Heuristiken an.
+
+\begin{table}[H]
+    \centering
+    \caption{Kennzahlen Vergleich der Giffler-Thompson-Prioritätsregeln}
+    \label{tab:gt_aggregated}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{lccccc}
+            \hline
+            \textbf{Prioritätsregel} & \textbf{Mittlerer $C_{\max}$} & \textbf{Mittlere RPD (\%)} & \textbf{Maximale RPD (\%)} & \textbf{Bestlösungen} & \textbf{Mittlerer Rang} \\
+            \hline
+            SPT                      & 2103,90                       & 27,97                      & 58,81                      & 0                     & 6,67                    \\
+            SPTS                     & 2068,47                       & 25,38                      & 54,44                      & 0                     & 6,20                    \\
+            LPT                      & 1988,93                       & 19,91                      & 39,29                      & 0                     & 5,43                    \\
+            FCFS                     & 2161,73                       & 27,88                      & 50,84                      & 0                     & 6,53                    \\
+            MINSTART                 & \textbf{1715,80}              & \textbf{2,90}              & \textbf{15,20}             & \textbf{13}           & \textbf{1,83}           \\
+            MINEND                   & 1869,07                       & 13,73                      & 39,24                      & 2                     & 3,70                    \\
+            Setup - MWKR             & 1730,07                       & 5,22                       & 19,17                      & 10                    & 2,30                    \\
+            FDD + MWKR + SS          & 1805,07                       & 7,68                       & 30,90                      & 5                     & 2,87                    \\
+            \hline
+        \end{tabular}%
+    }
+\end{table}
+
+Die Tabelle bestätigt die Überlegenheit der komplexeren Heuristiken.
+Die Regel MINSTART erzielt über alle 30 Instanzen hinweg die besten Ergebnisse.
+Sie weist den geringsten mittleren Makespan von 1715,80 auf.
+Zudem erreicht sie mit 2,90\,\% die kleinste mittlere relative prozentuale Abweichung (RPD).
+Auf 13 der 30 Instanzen liefert MINSTART die beste Startlösung.
+Ihr mittlerer Rang liegt damit bei 1,83.
+
+Dicht darauf folgt die Regel Setup - MWKR.
+Sie erzielt einen mittleren Makespan von 1730,07.
+In zehn Fällen liefert sie die beste Startlösung und erreicht damit einen mittleren Rang von 2,30.
+Die Regel FDD + MWKR + SS belegt den dritten Platz.
+Sie liefert fünf Bestlösungen und einen mittleren Rang von 2,87.
+Die Regel MINEND liegt deutlich zurück und erreicht mit zwei Bestlösungen einen mittleren Rang von 3,70.
+
+Die einfachen Prioritätsregeln zeigen eine deutlich schwächere Performance.
+Keine dieser Regeln kann eine Bestlösung erzeugen.
+LPT schneidet mit einem mittleren Makespan von 1988,93 noch am besten ab.
+SPT und FCFS bilden mit Rängen über 6,5 die Schlusslichter.
+Die Hinzunahme von Rüstzeiten bei SPTS führt zu einer leichten Verbesserung gegenüber SPT.
+Der mittlere Makespan sinkt dabei von 2103,90 auf 2068,47.
+Vergleichsweise ist diese Verbesserung jedoch zu vernachlässigen.
+
+
+%----------------------------------------------------------------------
+\section{Metaheuristik Ergebnisse}
+\label{sec:ergebnisse_metaheuristik}
+
+Nachdem eine geeignete Startlösung durch die Eröffnungsheuristik bestimmt wurde, wird in diesem Abschnitt die Leistungsfähigkeit der entwickelten Tabu-Suche evaluiert.
+Im Fokus steht dabei der Vergleich der drei Nachbarschaftsstrukturen \emph{Adjacent-Swap}, \emph{N5} und \emph{N6}.
+
+Die Untersuchung erfolgt zunächst exemplarisch anhand ausgewählter Einzelinstanzen.
+Dazu wird das Konvergenzverhalten grafisch für zwei kleinere Instanzen (4\_2 und 4\_3) sowie für eine größere Instanz (10\_1) unter verschiedenen Zeitlimits (90 und 300 Sekunden) analysiert.
+Daran anschließend werden die Ergebnisse über alle Instanzen hinweg aggregiert dargestellt.
+Somit wird eine fundierte Aussage über die Gesamtperformance der Nachbarschaften ermöglicht.
+Das primäre Ziel der ersten grafischen Darstellung ist es zu analysieren, wie effektiv die jeweiligen Nachbarschaften den Suchraum explorieren und inwieweit sie in der Lage sind, die Startlösung zu verbessern.
+
+Restriktive Nachbarschaften wie \emph{N5} und \emph{N6} intensivieren die Suche durch die ausschließliche Betrachtung bestimmter Operationen auf dem kritischen Pfad.
+Hierbei besteht jedoch das Risiko, dass sich die Suche mangels zulässiger Alternativen in lokalen Optima festläuft.
+Die breitere \emph{Adjacent-Swap}-Nachbarschaft gestattet hingegen auch Vertauschungen von direkt benachbarten Operationen innerhalb eines kritischen Blocks.
+Diese Züge sind bei \emph{N5} und \emph{N6} ausgeschlossen.
+Dadurch vergrößert sich die Anzahl zulässiger Übergänge, was alternative Pfade zur Überwindung lokaler Optima bereitstellt.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/neighborhood_comparison_ClassroomInstanceSet4_2.svg}
+    \caption{Vergleich des erreichten Makespans der verschiedenen Nachbarschaftsdefinitionen anhand der Instanz 4\_2.}
+    \label{fig:neighborhood_4_2_comparison}
+\end{figure}
+
+Für die Instanz 4\_2 starten alle drei Nachbarschaften mit einem identischen initialen Makespan von 957.
+Zu Beginn der Suche findet die \emph{N6}-Nachbarschaft am schnellsten eine Verbesserung und erreicht bereits nach 711 Iterationen ihren minimalen Makespan von 901.
+Die \emph{Adjacent-Swap}-Nachbarschaft verbessert sich anfangs etwas langsamer.
+Sie kann jedoch im weiteren Verlauf lokale Optima überwinden.
+Nach 1698 Iterationen konvergiert sie schließlich bei einem deutlich besseren Makespan von 881.
+Die \emph{N5}-Nachbarschaft verhält sich ähnlich wie \emph{N6}, erreicht jedoch erst nach 1877 Iterationen den gleichen Makespan von 901.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/neighborhood_comparison_ClassroomInstanceSet4_3.svg}
+    \caption{Vergleich des erreichten Makespans der verschiedenen Nachbarschaftsdefinitionen anhand der Instanz 4\_3.}
+    \label{fig:neighborhood_4_3_comparison}
+\end{figure}
+
+Ein ähnliches Verhalten zeigt sich bei der Instanz 4\_3, bei der die Startlösung einen Makespan von 840 aufweist.
+Hier erzielen sowohl die \emph{Adjacent-Swap}- als auch die \emph{N6}-Nachbarschaft den optimalen Makespan von 788.
+\emph{Adjacent-Swap} konvergiert dabei bereits nach 339 Iterationen.
+Die \emph{N6}-Nachbarschaft benötigt hingegen 1640 Iterationen für dasselbe Ergebnis.
+Die \emph{N5}-Nachbarschaft fällt mit einem minimalen Makespan von 803 deutlich zurück, welcher nach 1309 Iterationen erreicht wird.
+
+In den folgenden zwei Abbildungen wird die sehr große Instanzen 10\_1 mit unterschiedlichen Zeitlimits untersucht.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/neighborhood_comparison_ClassroomInstanceSet10_1_90s.svg}
+    \caption{Vergleich des erreichten Makespans der verschiedenen Nachbarschaftsdefinitionen anhand der Instanz 10\_1 mit einem Zeitlimit von 90 Sekunden.}
+    \label{fig:neighborhood_10_1_comparison_90}
+\end{figure}
+
+Mit einem Zeitlimit von 90 Sekunden und einer Startlösung von 3604 erzielt die \emph{Adjacent-Swap}-Nachbarschaft mit einem Makespan von 3047 das beste Ergebnis.
+\emph{N5} und \emph{N6} hingegen bleiben bereits deutlich früher, nach XXX und XXX Iterationen, in lokalen Optima stecken.
+
+Abbildung~\ref{fig:neighborhood_10_1_comparison_90} zeigt den Verlauf der Suche bei einem Zeitlimit von 90 Sekunden.
+Zu Beginn der Suche sinkt der Makespan bei allen Nachbarschaften stark, wobei die selektive \emph{N6}-Nachbarschaft in den ersten 500 Iterationen den schnellsten Fortschritt erzielt.
+Ab etwa Iteration 1000 erzielt die \emph{Adjacent-Swap}-Nachbarschaft jedoch kontinuierlich bessere Ergebnisse als die Vergleichsverfahren.
+Sie wird aufgrund des strikten Zeitlimits bei Iteration 2660 mit einem Makespan von 3047 gestoppt.
+Auch die \emph{N6}-Nachbarschaft wird aus dem selben Grund bei Iteration 1632 mit einem Makespan von 3080 abgebrochen.
+Die \emph{N5}-Nachbarschaft dagegen wird aufgrund der maximalen Anzahl Iterationen ohne Verbesserung beendet und erreicht trotz 3100 Iterationen nur einen Makespan von 3056.
+Dies verdeutlicht, dass die breitere Nachbarschaft auch in kürzeren Zeitfenstern trotz unvollständiger Suche die höchste Lösungsqualität liefert.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/neighborhood_comparison_ClassroomInstanceSet10_1_300s.svg}
+    \caption{Vergleich des erreichten Makespans der verschiedenen Nachbarschaftsdefinitionen anhand der Instanz 10\_1 mit einem Zeitlimit von 300 Sekunden.}
+    \label{fig:neighborhood_10_1_comparison_300}
+\end{figure}
+
+Mit dem erweiterten Zeitlimit von 300 Sekunden wird das Konvergenzverhalten der Nachbarschaftendefinitionen bei größeren Instanzen noch deutlicher.
+
+Sowohl \emph{N5} als auch \emph{N6} entkommen nicht aus lokalen Optima und brechen die Suche aufgrund stagnierender Ergebnisse vorzeitig ab.
+Die \emph{N5}-Nachbarschaft erreicht bereits bei Iteration 2100 ihre beste Lösung von 3056 und bricht die Suche nach 3100 Iterationen ab.
+Die \emph{N6}-Nachbarschaft findet nach Iteration 3240 keine Verbesserung mehr und beendet die Suche bei Iteration 4240 mit einem Makespan von 3059.
+Die breitere \emph{Adjacent-Swap}-Nachbarschaft hingegen überwindet lokale Optima fortlaufend und erzielt bei Iteration 4808 mit 2947 den besten Makespan.
+Alle drei Nachbarschaften brechen ihre Suche aufgrund fehlender Verbesserungen jedoch vor dem Zeitlimit ab.
+
+Um eine noch umfassendere Bewertung der Ergebnisse zu ermöglichen, werden die Nachbarschatsdefintionen in der folgenden Tabelle noch einmal zusammenfassend über alle 30 gegebenen Instanzen evaluiert.
+
+\begin{table}[H]
+    \centering
+    \caption{Vergleich der Nachbarschaftsdefinitionen über alle 30 Classroom-Instanzen mit einem Zeitlimit von 90\,s.}
+    \label{tab:neighborhood_comparison_all}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{lccccccc}
+            \hline
+            \textbf{Nachbarschaft} & \textbf{\O{} Verbesserung} & \textbf{Gewonnene Inst.} & \textbf{\O{} Gap} & \textbf{\O{} Iterationen} & \textbf{Iterationen (Summe)} & \textbf{\O{} Makespan} & \textbf{\O{} Laufzeit} \\
+            \hline
+            Adjacent               & 11,01\,\%                  & 18/30                    & 0,57\,\%          & 1957                      & 58.697                       & 1459,7                 & 23,5\,s                \\
+            N5                     & 9,86\,\%                   & 10/30                    & 1,90\,\%          & 2175                      & 65.259                       & 1475,8                 & 17,5\,s                \\
+            N6                     & 10,59\,\%                  & 15/30                    & 1,05\,\%          & 2530                      & 75.893                       & 1470,5                 & 36,8\,s                \\
+            \hline
+        \end{tabular}%
+    }
+\end{table}
+
+Die aggregierten Ergebnisse in Tabelle~\ref{tab:neighborhood_comparison_all} bestätigen die Leistungsvorteile der \emph{Adjacent-Swap}-Nachbarschaft.
+Sie erzielt über alle 30 Instanzen hinweg mit durchschnittlich 11,01\,\% die größte Verbesserung gegenüber den GT-Startlösungen.
+Zudem erreicht sie mit 1459,7 den geringsten mittleren Makespan und weist mit 0,57\,\% den kleinsten durchschnittlichen Abstand zur jeweils besten Nachbarschaft auf.
+Mit 18 gewonnenen Instanzen liefert sie in den meisten Fällen das beste heuristische Ergebnis.
+Die Nachbarschaft \emph{N6} folgt mit einer durchschnittlichen Verbesserung von 10,59\,\% und 15 gewonnenen Instanzen knapp dahinter.
+Sie benötigt jedoch mit einer mittleren Laufzeit von 36,8\,s die meiste Rechenzeit unter den getesteten Verfahren.
+Die \emph{N5}-Nachbarschaft schneidet mit einer Verbesserung von 9,86\,\% und einem Gap von 1,90\,\% in allen Qualitätsmetriken am schlechtesten ab.
+Sie weist jedoch aufgrund der schnellen Konvergenz mit 17,5\,s die kürzeste mittlere Laufzeit auf.
+
+Zusammenfassend zeigt sich, dass die \emph{Adjacent-Swap}-Nachbarschaft über alle getesteten Szenarien hinweg die besten und stabilsten Ergebnisse liefert.
+Obwohl die Nachbarschaften \emph{N5} und \emph{N6} durch die gezielte Veränderung von Operationen auf dem kritischen Pfad theoretisch effizienter sein sollten, erweist sich die einfachere Struktur von \emph{Adjacent-Swap} in der Praxis als überlegen.
+Dies lässt sich darauf zurückführen, dass \emph{Adjacent-Swap} weniger restriktiv ist und somit lokale Optima leichter überwinden kann, während die Berechnung einer einzelnen Iteration im Vergleich zu den komplexeren Nachbarschaften weniger Rechenzeit erfordert.
+
+%----------------------------------------------------------------------
+\section{Vergleich CP-Solver}
+\label{sec:cpsolver_vergleich}
+
+In diesem Abschnitt werden die Ergebnisse der Tabu-Suche mit dem exakten Constraint-Programming-Solver (CP-Solver) der Google OR-Tools verglichen.
+Dieser Vergleich dient als Maßstab für die Qualität der heuristischen Lösungen.
+Da der CP-Solver bei ausreichender Laufzeit optimale Lösungen garantieren kann, ermöglicht er die Bestimmung des verbleibenden Optimierungspotenzials der Heuristiken.
+Aufgrund der NP-Schwere des Job-Shop-Scheduling-Problems ist die Rechenzeit des Solvers in der Praxis jedoch limitiert.
+Daher wird evaluiert, wie sich die Verfahren unter identischen zeitlichen Restriktionen verhalten.
+
+Abbildung~\ref{fig:or_comparison_90} zeigt den Vergleich der Nachbarschaften mit dem CP-Solver bei einem Zeitlimit von 90 Sekunden auf dem Instanzset 10.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/solver_comparison_90s.svg}
+    \caption{Vergleich der Nachbarschaftsdefinitionen mit dem Google OR-Tools Solver anhand des erreichten Makespans für Instanzset 10 mit einem Zeitlimit von 90 Sekunden.}
+    \label{fig:or_comparison_90}
+\end{figure}
+
+Die Ergebnisse verdeutlichen, dass der CP-Solver unter dem strikten Zeitlimit von 90 Sekunden an seine Grenzen stößt.
+Bei der Instanz 10\_1 erreicht der Solver einen Makespan von 3042, während die \emph{Adjacent-Swap}-Nachbarschaft mit einem Abstand von nur +5 (+0,16\,\%) ein nahezu identisches Ergebnis von 3047 erzielt.
+Bei der Instanz 10\_2 kann die \emph{Adjacent-Swap}-Nachbarschaft den CP-Solver deutlich übertreffen und erzielt einen um 85 Punkte (-2,83\,\%) besseren Makespan von 2922.
+Überraschenderweise erzielt die sonst eher leistungsschwache Nachbarschaft \emph{N5} bei dieser Instanz mit 2906 sogar ein um 101 Punkte besseres Ergebnis als der Solver, während \emph{N6} mit 3082 abfällt.
+Auch bei der Instanz 10\_3 übertrifft \emph{Adjacent-Swap} (3271) den CP-Solver (3307) um 36 Punkte.
+Die beiden anderen Nachbarschaften liegen hier etwas über dem CP-Solver.
+Dies demonstriert, dass Heuristiken in stark begrenzten Zeitfenstern bei komplexeren Instanzen eine höhere Lösungsqualität finden können als ein exakter Solver.
+
+Abbildung~\ref{fig:or_comparison_300} stellt den gleichen Vergleich unter einem erweiterten Zeitlimit von 300 Sekunden dar.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.9\textwidth,inkscapelatex=false]{figures/solver_comparison_300s.svg}
+    \caption{Vergleich der Nachbarschaftsdefinitionen mit dem Google OR-Tools Solver. Zeitlimit 300 Sekunden.}
+    \label{fig:or_comparison_300}
+\end{figure}
+
+Mit der Erhöhung der Rechenzeit auf 300 Sekunden verbessert sich die Lösungsqualität über alle Heuristiken hinweg.
+Interessanterweise kann die \emph{Adjacent-Swap}-Nachbarschaft hier bei der Instanz 10\_1 den CP-Solver deutlich übertreffen und erreicht einen Makespan von 2947 im Vergleich zu 3075 des Solvers.
+Auch bei der Instanz 10\_2 bleibt die Heuristik führend.
+\emph{Adjacent-Swap} erzielt einen um 22 Punkte (-0,75\,\%) besseren Makespan (2920) als der CP-Solver (2942), während die Nachbarschaft \emph{N5} sogar ein um 36 Punkte besseres Ergebnis erreicht.
+Lediglich bei der Instanz 10\_3 bleibt der CP-Solver mit 3161 führend, wobei der Abstand von \emph{N6} mit +43 Punkten moderat ausfällt.
+Die Nachbarschaften \emph{N5} und \emph{N6} liegen in den meisten Fällen hinter \emph{Adjacent-Swap} zurück.
+
+Um diesen Vergleich quantitativ über alle Instanzen abzurunden, werden die Ergebnisse in Tabelle~\ref{tab:XXX} zusammengefasst.
+
 
 Tabelle 3: Vergleich mit OR-Tools
 
 - Instanz - OR-Tools Cmax - Tabu Search Cmax - absolute Abweichung - relative Abweichung in \% - Laufzeit OR-Tools - Laufzeit Tabu Search
-

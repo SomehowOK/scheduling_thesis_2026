@@ -8,7 +8,7 @@
     "latex-workshop.latex.tools": [
         {
             "name": "latexmk",
-            "command": "/Library/TeX/texbin/latexmk",
+            "command": "latexmk",
             "args": [
                 "-shell-escape",
                 "-synctex=1",
@@ -18,9 +18,7 @@
                 "-outdir=%OUTDIR%",
                 "%DOC%"
             ],
-            "env": {
-                "PATH": "/Library/TeX/texbin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-            }
+            "env": {}
         }
     ],
 

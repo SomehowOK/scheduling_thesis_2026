@@ -311,7 +311,8 @@
 		\fi
 		\includesvg[width=0.9\linewidth]{figures/ohm-logo.svg}\\[1cm]
 		\Large
-		\type {\;\ifrep \ifen at \else in \fi\fi}\\
+		\type {\;\ifrep \ifen at \else %in
+				\fi\fi}\\
 		\ifrep
 			\ifhasSubject
 				\vspace*{4ex}

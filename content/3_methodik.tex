@@ -10,6 +10,7 @@
 %----------------------------------------------------------------------
 
 \begin{algorithm}[H]
+    %\begin{algorithm}[H]
     \caption{Giffler-Thompson-Algorithmus}
     \label{alg:giffler_thompson}
 
@@ -67,7 +68,7 @@ Die Maschine, auf der dieser Wert erreicht wird, wird als kritische Maschine $m^
 Anschließend wird die Konfliktmenge $K$ gebildet. Diese enthält alle noch nicht verplanten Operationen auf der kritischen Maschine $m^*$, deren frühestmöglicher Startzeitpunkt echt kleiner als $C^*$ ist.
 Aus dieser Menge wird mithilfe einer Prioritätsregel $\pi$ eine Operation $o' = o_{j',k'}$ zur festen Einplanung ausgewählt.
 
-Das Einplanen erfolgt durch das Setzen der Startzeit $t(o')$ auf ihren frühestmöglichen Maschinen-Startzeitpunkt $r_m(o')$ und der Berechnung des Fertigstellungszeitpunkts $C(o')$.
+Das Einplanen erfolgt durch das Setzen der Startzeit $t(o')$ auf den frühestmöglichen Maschinen-Startzeitpunkt $r_m(o')$ und der Berechnung des Fertigstellungszeitpunkts $C(o')$.
 Daraufhin werden die Last $L_{m^*}$ der kritischen Maschine auf $C(o')$ aktualisiert und der Job-Index $j'$ als der zuletzt auf $m^*$ verarbeitete Job gespeichert.
 Falls eine Nachfolgeoperation $o_{j',\, k'+1}$ im selben Job existiert, wird deren Bereitschaftszeit $r(o_{j',\, k'+1})$ auf die Endzeit $C(o')$ angehoben, womit sie in der nächsten Iteration einplanbar wird.
 Abschließend wird die geplante Operation $o'$ aus der Menge $U$ entfernt.
@@ -75,6 +76,65 @@ Der Algorithmus terminiert, sobald alle Operationen eingeplant wurden und somit 
 
 Da in jeder Iteration des Algorithmus Konflikte zwischen den einplanbaren Operationen auf derselben Maschine auftreten können, werden Prioritätsregeln eingesetzt, um diese Konflikte aufzulösen.
 Die Wahl der Prioritätsregel hat dabei einen maßgeblichen Einfluss auf den initialen Makespan, wie in Kapitel \ref{sec:ergebnisse_eroeffnungsheuristik} aufgezeigt wird.
+
+Zu Beginn wurden acht verschiedene Prioritätsregeln für das Problem untersucht.
+Zunächst vier einfache Regeln, wie sie unter anderem von Haupt (1988) \cite{haupt_heuristic_1988} beschrieben werden.
+Sie beziehen sich meist auf eine einzelne Eigenschaft einer Operation.
+
+\begin{enumerate}
+    \item \textbf{Shortest Processing Time (SPT)}: Sortiert die Operationen nach aufsteigender Prozessdauer.
+    \item \textbf{Shortest Processing Time + Setup (SPTS)}: Betrachtet zusätzlich zur Prozessdauer die Rüstzeit.
+    \item \textbf{Longest Processing Time (LPT)}: Sortiert Operationen nach absteigender Prozessdauer.
+    \item \textbf{First Come First Served (FCFS)}: Ordnet die Operationen der Reihenfolge nach.\\
+\end{enumerate}
+
+Anschließend wurden vier weitere Prioritätsregeln nach Artigues et al. (2005) \cite{artigues_schedule_2005} und Kress et al. (2019) \cite{kress_worker_2019} implementiert.
+
+\begin{enumerate}
+    \setcounter{enumi}{4}
+    \item \textbf{Minimum Start Time (MINSTART)}: Wählt die Operation $v = o_{j,k} \in K$ mit dem frühestmöglichen Startzeitpunkt $r_m(v)$ aus:
+          \begin{equation}
+              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( r_m(v) \right)
+          \end{equation}
+          Sie minimiert Leerzeiten der Maschinen zu Beginn des Ablaufplans.
+          Dies geschieht durch ein frühestmögliches Einplanen der Operationen.
+          Als Nachteil wird die Bearbeitungszeit der gewählten Operationen ignoriert.
+          Auch die Restarbeit des Jobs bleibt unberücksichtigt.
+          Dies kann lange Jobs am Ende des Ablaufplans verzögern.
+          Zudem werden Rüstzeiten nicht direkt minimiert.
+
+    \item \textbf{Minimum End Time (MINEND)}: Wählt die Operation $v = o_{j,k} \in K$ aus, welche den frühestmöglichen Fertigstellungszeitpunkt (Summe aus dem Startzeitpunkt $r_m(v)$ und der Bearbeitungszeit $p_{j,k}$) aufweist:
+          \begin{equation}
+              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( r_m(v) + p_{j,k} \right)
+          \end{equation}
+          Diese Regel ist stark verwandt mit den Regeln MINSTART und SPT. Sie zielt jedoch auf den frühestmöglichen Abschluss einzelner Operationen ab und berücksichtigt zusätzlich die Maschinenverfügbarkeit.
+          Dadurch werden belegte Maschinen schnell wieder freigegeben.
+          Die Nachfolgeoperationen können somit früher beginnen und sehr lange Operationen werden zu Beginn vermieden, falls sie kürzere Operationen blockieren würden.
+          Der Nachteil liegt im Fehlen einer globalen Sicht auf die Restarbeit der Jobs.
+          Es können erhebliche Engpässe gegen Ende des Ablaufplans entstehen, die den Makespan negativ beeinflussen.
+
+    \item \textbf{Setup - Most Work Remaining (Setup - MWKR)}: Bevorzugt Operationen mit einer großen verbleibenden Restarbeit des zugehörigen Jobs $\sum_{l=k}^{q_j} p_{j,l}$, während gleichzeitig hohe sequenzabhängige Rüstzeiten $s_{u,v}$ zum vorherigen Job auf der Maschine bestraft werden:
+          \begin{equation}
+              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( s_{u,v} - \sum_{l=k}^{q_j} p_{j,l} \right)
+          \end{equation}
+          wobei $u$ die auf der Maschine $m^*$ direkt zuvor verarbeitete Operation darstellt.
+
+          Die Regel bevorzugt Jobs mit großer Restarbeit.
+          Gleichzeitig wirken hohe Rüstzeiten entgegengesetzt und machen die Operation unattraktiver.
+          Dies vermeidet Bottlenecks gegen Ende des Ablaufs.
+          Zudem wird der gesamte Prozess und nicht nur die unmittelbar nächste Operation betrachtet.
+          Ein Nachteil ist, dass die Regel die Maschinenverfügbarkeit und Operationsdauer nicht mit betrachtet.
+
+    \item \textbf{Flow Due Date + Most Work Remaining + Shortest Setup (FDD + MWKR + SS)}: Diese kombinierte Heuristik minimiert das Verhältnis aus der bereits erbrachten Job-Arbeit $\sum_{l=1}^{k} p_{j,l}$ und der verbleibenden Restarbeit $\sum_{l=k}^{q_j} p_{j,l}$, addiert um die Rüstzeit $s_{u,v}$ zur direkt vorherigen Operation $u$ auf derselben Maschine $m^*$:
+          \begin{equation}
+              o' = \operatorname{arg\,min}_{v = o_{j,k} \in K} \left( \frac{\sum_{l=1}^{k} p_{j,l}}{\sum_{l=k}^{q_j} p_{j,l}} + s_{u,v} \right)
+          \end{equation}
+          wobei $u$ die auf der kritischen Maschine $m^*$ direkt zuvor verarbeitete Operation darstellt.
+
+          Sie wägt den relativen Jobfortschritt und die Rüstzeit gegeneinander ab.
+          Dies sorgt für eine ausgeglichene Maschinenauslastung.
+          Jedoch dominiert bei geringen Rüstzeiten der relative Jobfortschritt und bei großen Rüstzeiten überwiegt diese das Fortschrittsverhältnis.
+\end{enumerate}
 
 
 %----------------------------------------------------------------------
