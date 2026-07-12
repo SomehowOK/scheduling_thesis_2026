@@ -14,34 +14,6 @@ Die Reihenfolge der Operationen innerhalb eines Jobs ist vorgegeben. Eine Operat
 
 Jede Operation \(o_{j,k}\) wird auf genau einer Maschine \(m_{j,k} \in M\) bearbeitet und besitzt eine Bearbeitungszeit \(p_{j,k}\). Zwischen zwei Operationen, die auf derselben Maschine direkt aufeinanderfolgen, kann eine sequenzabhängige Rüstzeit \(s_{u,v}\) anfallen. Diese hängt von der vorherigen Operation \(u\) und der nachfolgenden Operation \(v\) ab.
 
-\begin{table}[H]
-    \centering
-    \caption{Notation des Job-Shop-Scheduling-Problems}
-    \label{tab:notation_problem}
-    \begin{tabular}{ll}
-        \hline
-        \textbf{Symbol} & \textbf{Bedeutung}                                                             \\
-        \hline
-        \(J\)           & Menge der Jobs                                                                 \\
-        \(j\)           & Index eines Jobs, \(j \in J\)                                                  \\
-        \(M\)           & Menge der Maschinen                                                            \\
-        \(m\)           & Index einer Maschine, \(m \in M\)                                              \\
-        \(O_j\)         & geordnete Menge der Operationen von Job \(j\)                                  \\
-        \(o_{j,k}\)     & \(k\)-te Operation von Job \(j\)                                               \\
-        \(q_j\)         & Anzahl der Operationen von Job \(j\)                                           \\
-        \(O\)           & Menge aller Operationen                                                        \\
-        \(m_{j,k}\)     & Maschine, auf der Operation \(o_{j,k}\) bearbeitet wird                        \\
-        \(p_{j,k}\)     & Bearbeitungszeit der Operation \(o_{j,k}\)                                     \\
-        \(s_{u,v}\)     & Rüstzeit zwischen zwei direkt aufeinanderfolgenden Operationen \(u\) und \(v\) \\
-        \(t(o)\)        & Startzeit der Operation \(o\)                                                  \\
-        \(C(o)\)        & Endzeit der Operation \(o\)                                                    \\
-        \(C_{\max}\)    & Makespan einer Lösung                                                          \\
-        \(F(S)\)        & Zielfunktionswert der Lösung \(S\)                                             \\
-        \hline
-    \end{tabular}
-\end{table}
-
-
 \section*{Notation der Eröffnungsheuristik}
 
 Zur Erzeugung einer zulässigen Startlösung wird der Giffler-Thompson-Algorithmus verwendet. Für die mathematische Formulierung dieses Verfahrens werden folgende zusätzliche Symbole und Hilfsvariablen benötigt:
